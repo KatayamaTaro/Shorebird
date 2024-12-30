@@ -22,23 +22,24 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      dateInput("date", "Date:", value = Sys.Date()),
+      dateInput("date", "Survey Date:", value = Sys.Date(), format = "mm/dd/yyyy"),
       
-      selectInput("zone1", "Zone I Species:",
-                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      selectInput("zone", "Zone Class:",
+                  choices = c("Select Zone", "I", "II", "III")),
       
-      selectInput("zone2", "Zone II Species:",
-                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      selectInput("dataType", "Species:",
+                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret", "People", "Dogs on Leash", "Brown Pelican", "Cormorant", "Black-Bellied Plover", "Willet", "Wandering Tattler", "Spotted Sandpiper", "Marbled Godwit", "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")),
       
-      selectInput("zone3", "Zone III Species:",
-                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      numericInput("dataCount", "Data Count:", value = 1, min = 1),
       
       actionButton("submit", "Submit"),
+      actionButton("removeLast", "Remove Last Entry"),
       downloadButton("downloadData", "Download CSV")
     ),
     
     mainPanel(
-      textOutput("status")
+      textOutput("status"),
+      tableOutput("dataTable")  # Display the submitted data
     )
   )
 )
@@ -47,18 +48,18 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   # Reactive value to store data
-  data <- reactiveVal(data.frame(Date = character(),
-                                  Zone_I = character(),
-                                  Zone_II = character(),
-                                  Zone_III = character(),
+  data <- reactiveVal(data.frame(SurveyDate = character(),
+                                  ZoneClass = factor(levels = c("I", "II", "III")),
+                                  DataType = character(),
+                                  DataCount = numeric(),
                                   stringsAsFactors = FALSE))
   
   observeEvent(input$submit, {
-    # Create a new row of data
-    new_data <- data.frame(Date = input$date,
-                            Zone_I = input$zone1,
-                            Zone_II = input$zone2,
-                            Zone_III = input$zone3,
+    # Create a new row of data with formatted date
+    new_data <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),  # Format date as MM/DD/YYYY
+                            ZoneClass = factor(input$zone, levels = c("I", "II", "III")),
+                            DataType = input$dataType,
+                            DataCount = input$dataCount,
                             stringsAsFactors = FALSE)
     
     # Append new data to existing data
@@ -69,10 +70,28 @@ server <- function(input, output, session) {
     output$status <- renderText("Data submitted successfully!")
     
     # Reset inputs
-    updateSelectInput(session, "zone1", selected = "Select Species")
-    updateSelectInput(session, "zone2", selected = "Select Species")
-    updateSelectInput(session, "zone3", selected = "Select Species")
+    updateSelectInput(session, "dataType", selected = "Select Species")
+    updateNumericInput(session, "dataCount", value = 1)
+    updateSelectInput(session, "zone", selected = "Select Zone")
   })
+  
+  # Remove the last entry
+  observeEvent(input$removeLast, {
+    current_data <- data()
+    if (nrow(current_data) > 0) {
+      # Remove the last row
+      updated_data <- current_data[-nrow(current_data), ]
+      data(updated_data)
+      output$status <- renderText("Last entry removed successfully!")
+    } else {
+      output$status <- renderText("No entries to remove.")
+    }
+  })
+  
+  # Display the submitted data in a table
+  output$dataTable <- renderTable({
+    data()
+  }, rownames = TRUE)  # Include row names
   
   # Download handler for CSV
   output$downloadData <- downloadHandler(
