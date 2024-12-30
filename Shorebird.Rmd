@@ -1,0 +1,91 @@
+---
+title: "ShoreBird_Shiny"
+output: html_document
+date: "2024-12-30"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(shiny)
+```
+
+```{r}
+# Define UI
+ui <- fluidPage(
+  titlePanel("Shorebird Data Entry"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      dateInput("date", "Date:", value = Sys.Date()),
+      
+      selectInput("zone1", "Zone I Species:",
+                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      
+      selectInput("zone2", "Zone II Species:",
+                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      
+      selectInput("zone3", "Zone III Species:",
+                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret")),
+      
+      actionButton("submit", "Submit"),
+      downloadButton("downloadData", "Download CSV")
+    ),
+    
+    mainPanel(
+      textOutput("status")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output, session) {
+  
+  # Reactive value to store data
+  data <- reactiveVal(data.frame(Date = character(),
+                                  Zone_I = character(),
+                                  Zone_II = character(),
+                                  Zone_III = character(),
+                                  stringsAsFactors = FALSE))
+  
+  observeEvent(input$submit, {
+    # Create a new row of data
+    new_data <- data.frame(Date = input$date,
+                            Zone_I = input$zone1,
+                            Zone_II = input$zone2,
+                            Zone_III = input$zone3,
+                            stringsAsFactors = FALSE)
+    
+    # Append new data to existing data
+    updated_data <- rbind(data(), new_data)
+    data(updated_data)
+    
+    # Update status message
+    output$status <- renderText("Data submitted successfully!")
+    
+    # Reset inputs
+    updateSelectInput(session, "zone1", selected = "Select Species")
+    updateSelectInput(session, "zone2", selected = "Select Species")
+    updateSelectInput(session, "zone3", selected = "Select Species")
+  })
+  
+  # Download handler for CSV
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("shorebird_data_", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(data(), file, row.names = FALSE)
+    }
+  )
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
