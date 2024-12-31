@@ -11,7 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(tidyverse)
 library(shiny)
 ```
 
@@ -54,6 +53,9 @@ server <- function(input, output, session) {
                                   DataCount = numeric(),
                                   stringsAsFactors = FALSE))
   
+  # Reactive value to store the last selected zone
+  lastZone <- reactiveVal("Select Zone")
+  
   observeEvent(input$submit, {
     # Create a new row of data with formatted date
     new_data <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),  # Format date as MM/DD/YYYY
@@ -66,13 +68,18 @@ server <- function(input, output, session) {
     updated_data <- rbind(data(), new_data)
     data(updated_data)
     
+    # Update last selected zone
+    lastZone(input$zone)
+    
     # Update status message
     output$status <- renderText("Data submitted successfully!")
     
-    # Reset inputs
+    # Reset other inputs
     updateSelectInput(session, "dataType", selected = "Select Species")
     updateNumericInput(session, "dataCount", value = 1)
-    updateSelectInput(session, "zone", selected = "Select Zone")
+    
+    # Set the zone input to the last selected zone
+    updateSelectInput(session, "zone", selected = lastZone())
   })
   
   # Remove the last entry
@@ -83,6 +90,13 @@ server <- function(input, output, session) {
       updated_data <- current_data[-nrow(current_data), ]
       data(updated_data)
       output$status <- renderText("Last entry removed successfully!")
+      
+      # Update lastZone to the new last entry's zone if there are still entries
+      if (nrow(updated_data) > 0) {
+        lastZone(updated_data$ZoneClass[nrow(updated_data)])
+      } else {
+        lastZone("Select Zone")  # Reset if no entries are left
+      }
     } else {
       output$status <- renderText("No entries to remove.")
     }
@@ -106,5 +120,5 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-```
 
+```
