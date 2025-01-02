@@ -10,11 +10,10 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-library(shiny)
-```
 
 ```{r}
+library(shiny)
+
 # Define UI
 ui <- fluidPage(
   titlePanel("Shorebird Data Entry"),
@@ -24,7 +23,7 @@ ui <- fluidPage(
       dateInput("date", "Survey Date:", value = Sys.Date(), format = "mm/dd/yyyy"),
       
       selectInput("zone", "Zone Class:",
-                  choices = c("Select Zone", "I", "II", "III")),
+                  choices = c("Select Zone", "I", "II", "III", "III Boulders", "III Rocky Outcrop")),
       
       selectInput("dataType", "Species:",
                   choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret", "People", "Dogs on Leash", "Brown Pelican", "Cormorant", "Black-Bellied Plover", "Willet", "Wandering Tattler", "Spotted Sandpiper", "Marbled Godwit", "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")),
@@ -48,7 +47,7 @@ server <- function(input, output, session) {
   
   # Reactive value to store data
   data <- reactiveVal(data.frame(SurveyDate = character(),
-                                  ZoneClass = factor(levels = c("I", "II", "III")),
+                                  ZoneClass = factor(levels = c("I", "II", "III", "III Boulders", "III Rocky Outcrop")),
                                   DataType = character(),
                                   DataCount = numeric(),
                                   stringsAsFactors = FALSE))
@@ -58,8 +57,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$submit, {
     # Create a new row of data with formatted date
-    new_data <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),  # Format date as MM/DD/YYYY
-                            ZoneClass = factor(input$zone, levels = c("I", "II", "III")),
+    new_data <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),
+                            ZoneClass = factor(input$zone, levels = c("I", "II", "III", "III Boulders", "III Rocky Outcrop")),
                             DataType = input$dataType,
                             DataCount = input$dataCount,
                             stringsAsFactors = FALSE)
@@ -113,6 +112,7 @@ server <- function(input, output, session) {
       paste("shorebird_data_", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
+      # Specify the path where the CSV will be saved
       write.csv(data(), file, row.names = FALSE)
     }
   )
@@ -120,5 +120,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
 ```
