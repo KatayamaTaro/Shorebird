@@ -1,0 +1,273 @@
+SurveyDate,ZoneClass,DataType,DataCount
+1/4/2023,I,People,43
+1/4/2023,I,Cormorant,1
+1/4/2023,I,Spotted Sandpiper,3
+1/4/2023,I,Western Gull,1
+1/4/2023,I,Black Phoebe,1
+1/4/2023,II,Great Egret,1
+1/4/2023,II,Spotted Sandpiper,1
+1/4/2023,II,Western Gull,2
+1/4/2023,II,Black Phoebe,1
+1/4/2023,III,Great Egret,2
+1/4/2023,III,Snowy Egret,1
+1/4/2023,III,Whimbrel,1
+1/4/2023,III,Western Gull,1
+1/4/2023,III,Black Phoebe,1
+1/4/2023,III Boulders,Western Gull,1
+1/4/2023,III Rocky Outcrop,Brown Pelican,42
+1/4/2023,III Rocky Outcrop,Western Gull,114
+1/4/2023,III Rocky Outcrop,Heerman's Gull,6
+1/20/2023,I,People,103
+1/20/2023,I,California Gull,2
+1/20/2023,II,People,79
+1/20/2023,II,Great Egret,1
+1/20/2023,II,Snowy Egret,1
+1/20/2023,II,Unidentified Gull,1
+1/20/2023,II,Western Gull,1
+1/20/2023,III,People,1
+1/20/2023,III,Snowy Egret,1
+1/20/2023,III,Whimbrel,1
+1/20/2023,III,Unidentified Gull,6
+1/20/2023,III Rocky Outcrop,Great Egret,1
+1/20/2023,III Rocky Outcrop,Brown Pelican,12
+1/20/2023,III Rocky Outcrop,Cormorant,3
+1/20/2023,III Rocky Outcrop,Unidentified Gull,50
+1/31/2023,I,People,21
+1/31/2023,II,People,6
+1/31/2023,II,Spotted Sandpiper,2
+1/31/2023,II,Unidentified Gull,1
+1/31/2023,II,Western Gull,1
+1/31/2023,II,Black Phoebe,3
+1/31/2023,III,Great Egret,2
+1/31/2023,III,Snowy Egret,5
+1/31/2023,III,Spotted Sandpiper,1
+1/31/2023,III,Western Gull,3
+1/31/2023,III,Unidentified Gull,1
+1/31/2023,III,Brown Pelican,4
+1/31/2023,III Boulders,Unidentified Gull,1
+1/31/2023,III Rocky Outcrop,Brown Pelican,24
+1/31/2023,III Rocky Outcrop,Unidentified Gull,63
+1/31/2023,III Rocky Outcrop,Tern,22
+2/1/2023,I,People,38
+2/1/2023,II,People,6
+2/1/2023,II,Spotted Sandpiper,4
+2/1/2023,II,California Gull,1
+2/1/2023,II,Black Phoebe,1
+2/1/2023,III,Snowy Egret,1
+2/1/2023,III,Brown Pelican,5
+2/1/2023,III,Spotted Sandpiper,2
+2/1/2023,III,Whimbrel,2
+2/1/2023,III,Western Gull,2
+2/1/2023,III,Tern,3
+2/1/2023,III Boulders,Snowy Egret,2
+2/1/2023,III Rocky Outcrop,Great Blue Heron,3
+2/1/2023,III Rocky Outcrop,Great Egret,2
+2/1/2023,III Rocky Outcrop,Brown Pelican,24
+2/1/2023,III Rocky Outcrop,Cormorant,1
+2/1/2023,III Rocky Outcrop,Unidentified Gull,53
+2/1/2023,III Rocky Outcrop,Tern,3
+2/2/2023,I,People,63
+2/2/2023,I,Snowy Egret,1
+2/2/2023,II,People,7
+2/2/2023,II,Spotted Sandpiper,3
+2/2/2023,II,Western Gull,2
+2/2/2023,II,Black Phoebe,2
+2/2/2023,III,Great Blue Heron,2
+2/2/2023,III,Snowy Egret,1
+2/2/2023,III,Spotted Sandpiper,2
+2/2/2023,III,Western Gull,2
+2/2/2023,III,Black Phoebe,2
+2/2/2023,III Boulders,Great Blue Heron,1
+2/2/2023,III Boulders,Snowy Egret,1
+2/2/2023,III Rocky Outcrop,Brown Pelican,40
+2/2/2023,III Rocky Outcrop,Cormorant,3
+2/2/2023,III Rocky Outcrop,Unidentified Gull,160
+2/2/2023,III Rocky Outcrop,Juvenile Gull,27
+2/16/2023,I,People,96
+2/16/2023,II,People,31
+2/16/2023,II,Snowy Egret,2
+2/16/2023,II,Spotted Sandpiper,1
+2/16/2023,II,Whimbrel,1
+2/16/2023,II,Western Gull,1
+2/16/2023,II,Black Phoebe,4
+2/16/2023,III,Great Blue Heron,1
+2/16/2023,III,Great Egret,1
+2/16/2023,III,Snowy Egret,2
+2/16/2023,III,Spotted Sandpiper,1
+2/16/2023,III,Whimbrel,1
+2/16/2023,III,Western Gull,1
+2/16/2023,III,California Gull,4
+2/16/2023,III Boulders,Snowy Egret,1
+2/16/2023,III Rocky Outcrop,Cormorant,10
+2/16/2023,III Rocky Outcrop,Unidentified Gull,14
+2/16/2023,III Rocky Outcrop,Juvenile Gull,1
+2/17/2023,I,People,90
+2/17/2023,I,Great Egret,1
+2/17/2023,I,Western Gull,1
+2/17/2023,I,California Gull,1
+2/17/2023,II,People,24
+2/17/2023,II,Spotted Sandpiper,1
+2/17/2023,II,Western Gull,3
+2/17/2023,II,Black Phoebe,2
+2/17/2023,III,Great Blue Heron,1
+2/17/2023,III,Great Egret,18
+2/17/2023,III,Snowy Egret,3
+2/17/2023,III,Brown Pelican,1
+2/17/2023,III,Spotted Sandpiper,2
+2/17/2023,III,Whimbrel,1
+2/17/2023,III,Western Gull,1
+2/17/2023,III Rocky Outcrop,Great Egret,3
+2/17/2023,III Rocky Outcrop,Brown Pelican,13
+2/17/2023,III Rocky Outcrop,Cormorant,5
+2/17/2023,III Rocky Outcrop,Unidentified Gull,74
+2/17/2023,III Rocky Outcrop,Tern,33
+3/2/2023,I,People,68
+3/2/2023,I,Snowy Egret,1
+3/2/2023,II,People,7
+3/2/2023,II,California Gull,2
+3/2/2023,II,Black Phoebe,2
+3/2/2023,III,Great Blue Heron,1
+3/2/2023,III,Great Egret,2
+3/2/2023,III,Snowy Egret,1
+3/2/2023,III Rocky Outcrop,Great Blue Heron,1
+3/2/2023,III Rocky Outcrop,Great Egret,1
+3/2/2023,III Rocky Outcrop,Snowy Egret,2
+3/2/2023,III Rocky Outcrop,Brown Pelican,1
+3/2/2023,III Rocky Outcrop,Cormorant,4
+3/2/2023,III Rocky Outcrop,Unidentified Gull,51
+3/2/2023,III Rocky Outcrop,Tern,2
+3/3/2023,I,People,49
+3/3/2023,I,Great Egret,1
+3/3/2023,I,Spotted Sandpiper,1
+3/3/2023,II,People,18
+3/3/2023,II,Great Egret,1
+3/3/2023,II,Cormorant,2
+3/3/2023,II,Western Gull,1
+3/3/2023,II,Juvenile Gull,1
+3/3/2023,II,Black Phoebe,2
+3/3/2023,III,Great Egret,1
+3/3/2023,III,Snowy Egret,2
+3/3/2023,III,Western Gull,3
+3/3/2023,III,Juvenile Gull,2
+3/3/2023,III Rocky Outcrop,Great Egret,1
+3/3/2023,III Rocky Outcrop,Snowy Egret,3
+3/3/2023,III Rocky Outcrop,Brown Pelican,16
+3/3/2023,III Rocky Outcrop,Cormorant,2
+3/3/2023,III Rocky Outcrop,Unidentified Gull,18
+3/3/2023,III Rocky Outcrop,Tern,17
+3/6/2023,I,People,58
+3/6/2023,I,Snowy Egret,1
+3/6/2023,I,Spotted Sandpiper,2
+3/6/2023,I,Western Gull,1
+3/6/2023,II,People,8
+3/6/2023,III,Great Egret,13
+3/6/2023,III,Snowy Egret,1
+3/6/2023,III,Spotted Sandpiper,1
+3/6/2023,III,Western Gull,2
+3/6/2023,III Boulders,Snowy Egret,1
+3/6/2023,III Rocky Outcrop,Snowy Egret,4
+3/6/2023,III Rocky Outcrop,Brown Pelican,115
+3/6/2023,III Rocky Outcrop,Cormorant,1
+3/6/2023,III Rocky Outcrop,Willet,1
+3/6/2023,III Rocky Outcrop,Unidentified Gull,23
+3/6/2023,III Rocky Outcrop,Tern,75
+4/13/2023,I,People,25
+4/13/2023,II,People,5
+4/13/2023,II,Spotted Sandpiper,3
+4/13/2023,II,Black Turnstone,1
+4/13/2023,II,Whimbrel,1
+4/13/2023,II,Western Gull,2
+4/13/2023,III,People,1
+4/13/2023,III,Spotted Sandpiper,1
+4/13/2023,III Rocky Outcrop,Cormorant,3
+4/13/2023,III Rocky Outcrop,Unidentified Gull,1
+4/13/2023,III Rocky Outcrop,Juvenile Gull,3
+4/14/2023,I,People,73
+4/14/2023,II,People,24
+4/14/2023,II,Snowy Egret,2
+4/14/2023,II,Western Gull,2
+4/14/2023,III,Great Egret,2
+4/14/2023,III,Spotted Sandpiper,1
+4/14/2023,III,Western Gull,3
+4/14/2023,III Rocky Outcrop,Brown Pelican,18
+4/14/2023,III Rocky Outcrop,Cormorant,1
+4/14/2023,III Rocky Outcrop,Unidentified Gull,5
+5/11/2023,I,People,5
+5/11/2023,II,Snowy Egret,1
+5/11/2023,II,Spotted Sandpiper,4
+5/11/2023,II,Unidentified Gull,1
+5/11/2023,II,California Gull,1
+5/11/2023,III,Great Blue Heron,5
+5/11/2023,III,Great Egret,3
+5/11/2023,III,Snowy Egret,1
+5/11/2023,III,Western Gull,9
+5/11/2023,III,Juvenile Gull,2
+5/11/2023,III Rocky Outcrop,Brown Pelican,1
+5/11/2023,III Rocky Outcrop,Cormorant,1
+5/11/2023,III Rocky Outcrop,Unidentified Gull,8
+5/11/2023,III Rocky Outcrop,Juvenile Gull,2
+5/11/2023,III Rocky Outcrop,Tern,6
+11/13/2023,I,People,85
+11/13/2023,I,Spotted Sandpiper,2
+11/13/2023,I,Willet,1
+11/13/2023,I,Western Gull,1
+11/13/2023,II,People,6
+11/13/2023,II,Great Egret,3
+11/13/2023,II,Snowy Egret,1
+11/13/2023,II,Cormorant,1
+11/13/2023,II,Spotted Sandpiper,2
+11/13/2023,III,Western Gull,9
+11/13/2023,III,Juvenile Gull,3
+11/13/2023,III,Black Phoebe,1
+11/13/2023,III Rocky Outcrop,Brown Pelican,27
+11/13/2023,III Rocky Outcrop,Unidentified Gull,96
+11/27/2023,I,People,28
+11/27/2023,II,People,29
+11/27/2023,II,Snowy Egret,1
+11/27/2023,II,Unidentified Gull,1
+11/27/2023,II,Western Gull,6
+11/27/2023,II,Juvenile Gull,1
+11/27/2023,III,People,5
+11/27/2023,III,Great Egret,4
+11/27/2023,III,Snowy Egret,2
+11/27/2023,III,Western Gull,3
+11/27/2023,III,California Gull,4
+11/27/2023,III,Juvenile Gull,2
+11/27/2023,III,Black Phoebe,1
+11/27/2023,III Rocky Outcrop,Great Egret,7
+11/27/2023,III Rocky Outcrop,Snowy Egret,1
+11/27/2023,III Rocky Outcrop,Brown Pelican,32
+11/27/2023,III Rocky Outcrop,Unidentified Gull,32
+11/27/2023,III Rocky Outcrop,Juvenile Gull,8
+12/11/2023,I,People,27
+12/11/2023,I,California Gull,1
+12/11/2023,II,People,10
+12/11/2023,II,Great Egret,2
+12/11/2023,II,Spotted Sandpiper,1
+12/11/2023,III,Great Blue Heron,1
+12/11/2023,III,Spotted Sandpiper,1
+12/11/2023,III,Western Gull,2
+12/11/2023,III,California Gull,8
+12/11/2023,III,Juvenile Gull,2
+12/11/2023,III Boulders,Brown Pelican,13
+12/11/2023,III Rocky Outcrop,Great Blue Heron,1
+12/11/2023,III Rocky Outcrop,Brown Pelican,19
+12/11/2023,III Rocky Outcrop,Cormorant,3
+12/11/2023,III Rocky Outcrop,Unidentified Gull,40
+12/11/2023,III Rocky Outcrop,Juvenile Gull,1
+12/12/2023,I,People,58
+12/12/2023,I,Western Gull,1
+12/12/2023,I,Black Phoebe,2
+12/12/2023,I,Say's Phoebe,1
+12/12/2023,II,People,25
+12/12/2023,II,Western Gull,1
+12/12/2023,II,Black Phoebe,1
+12/12/2023,III,Great Blue Heron,1
+12/12/2023,III,Great Egret,1
+12/12/2023,III,Snowy Egret,1
+12/12/2023,III,Cormorant,1
+12/12/2023,III,Western Gull,15
+12/12/2023,III Boulders,Great Blue Heron,2
+12/12/2023,III Rocky Outcrop,Brown Pelican,75
+12/12/2023,III Rocky Outcrop,Cormorant,2
+12/12/2023,III Rocky Outcrop,Unidentified Gull,85
