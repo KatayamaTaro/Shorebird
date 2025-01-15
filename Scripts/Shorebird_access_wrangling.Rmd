@@ -2,28 +2,50 @@
 title: "Shorebird_Access_Wrangling"
 output: html_document
 date: "2025-01-15"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(tidyverse)
+library(dplyr)
 ```
 
-## Including Plots
+```{r}
+shorebird_raw<- read.csv("./data/2011_sppbySurveydateandZone.csv")
 
-You can also embed plots, for example:
+shorebird_raw$SurveyDate<- as.Date(shorebird_raw$SurveyDate, format = "%m/%d/%Y")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+shorebird<- shorebird_raw%>%
+  filter(SurveyDate> as.Date("2010-12-31"))
+
+# Identify duplicates based on specific columns
+duplicates_specific <- shorebird %>%
+  filter(duplicated(select(., SurveyDate, Zone, Bird)) | 
+         duplicated(select(., SurveyDate, Zone, Bird), fromLast = TRUE))
+
+# Check for valid zones
+valid_zones <- c("I", "II", "III", "III Boulders", "III Rocky Outcrop")
+invalid_zones <- shorebird %>%
+  filter(!Zone %in% valid_zones)
+
+
+# Check for valid species
+valid_species <- c("Great Blue Heron", "Great Egret", "Snowy Egret", "People", "Dogs on Leash", "Brown Pelican", "Cormorant", "Black-Bellied Plover", "Willet", "Wandering Tattler", "Spotted Sandpiper", "Marbled Godwit", "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")
+
+invalid_species <- shorebird %>%
+  filter(!Bird %in% valid_species)
+
+print(duplicates_specific)
+print(invalid_species)
+print(invalid_zones)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+write.csv(shorebird, file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/data/SHorebird2011-2024.csv")
+```
+
