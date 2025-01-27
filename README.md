@@ -1,2 +1,2 @@
 # Shorebird_Data_Entry
-R Shiny that helps CABR staff enter Shorebird survey data more efficiently. Shiny provides drop down for easy data entry, and spits out a .csv in a readily accessible format for data analysis
+R Shiny that helps CABR staff enter Shorebird survey data more efficiently. Shiny provides drop down for easy data entry, and spits out a .csv in a readily accessible format for data analysis. Shiny lives in the scripts folder as Shorebird_Shiny. Other scripts are scripts that Biologist used to QA/QC shorebird data from 2011-2024. Data not yet publicly available but will be released on datastore in the future. 
