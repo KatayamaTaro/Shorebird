@@ -1,0 +1,101 @@
+---
+title: "Shorebird_Wrangling"
+output: html_document
+date: "2025-01-27"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Load packages
+
+```{r}
+library(tidyverse)
+library(dplyr)
+```
+Read data files
+
+```{r}
+rm(list = ls())
+
+getwd()
+shorebird_original<- read.csv("./data/Shorebird_2011_2024.csv")
+shorebird_addition_2012_2021<- read.csv("./data/shorebird_data_2012_2021.csv")
+shorebird_addition_2022<- read.csv("./data/shorebird_data_2022.csv")
+shorebird_addition_2023<- read.csv("./data/shorebird_data_2023.csv")
+shorebird_addition_2024<- read.csv("./data/shorebird_data_2024.csv")
+
+shorebird_data_correction_2012_2018<- read.csv("./data/shorebird_data_correction_2012_2018.csv")
+shorebird_data_correction_2019_2024<- read.csv("./data/shorebird_data_correction_2019-2024.csv")
+
+shorebird_replacements<- read.csv("./data/shorebird_data_replacements.csv")
+```
+
+combine all addition shorebird addition datasets
+```{r}
+combined_additions<- rbind(shorebird_addition_2012_2021, shorebird_addition_2022, shorebird_addition_2023, shorebird_addition_2024)%>%
+
+  
+
+combined_additions<- combined_additions%>%
+  rename(
+    Zone = ZoneClass
+  )
+
+
+```
+
+combine data corrections
+
+```{r}
+combined_data_correction<- rbind(shorebird_data_correction_2012_2018, shorebird_data_correction_2019_2024, shorebird_replacements)
+combined_data_correction<- combined_data_correction%>%
+  rename(
+    Zone = ZoneClass
+  )
+
+combined_data_correction$SurveyDate<- as.Date(combined_data_correction$SurveyDate, format = "%m/%d/%Y")
+```
+
+Remove unwanted data sets
+```{r}
+rm(shorebird_addition_2012_2021, shorebird_addition_2022, shorebird_addition_2023, shorebird_addition_2024, shorebird_addition_2024, shorebird_data_correction_2012_2018, shorebird_data_correction_2019_2024, shorebird_replacements)
+```
+
+```{r}
+shorebird_processed<- shorebird_original%>%
+  select(2:5)%>%
+  bind_rows(shorebird_processed, combined_additions)%>%
+  distinct()
+
+
+shorebird_processed$SurveyDate<- as.Date(shorebird_processed$SurveyDate, format = "%m/%d/%Y")
+
+shorebird_clean<- shorebird_processed%>% arrange((SurveyDate))
+```
+
+```{r}
+# Join the original data frame with the correction data frame
+combined_df <- shorebird_clean %>%
+  left_join(combined_data_correction, by = c("SurveyDate", "Zone", "DataType"), suffix = c("_original", "_correction"))
+
+# Replace DataCount in the original data frame with the correction where applicable
+shorebird_and_partial_corrections <- combined_df %>%
+  mutate(
+    DataCount = ifelse(!is.na(DataCount_correction), DataCount_correction, DataCount_original)
+  ) %>%
+  select(SurveyDate, Zone, DataType, DataCount)  # Select relevant columns
+
+# Identify unique entries from the correction data frame that do not exist in the original data frame
+unique_corrections <- combined_data_correction %>%
+  anti_join(shorebird_clean, by = c("SurveyDate", "Zone", "DataType"))
+
+# Combine the modified original data frame with the unique corrections
+final_shorebird <- bind_rows(shorebird_and_partial_corrections, unique_corrections)%>%
+  arrange(SurveyDate)
+
+write.csv(final_shorebird, "./data/Shorebird_FINAL.csv")
+```
+

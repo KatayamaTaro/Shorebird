@@ -20,8 +20,11 @@ library(readxl)
 ```{r}
 shorebird_xls<- read_excel("./data/Shorebird2011_2024.xls")
 write.csv(shorebird_xls, file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/data/Shorebird_2011_2024.csv")
+```
 
-shorebird_raw<- read.csv("./data/2011_sppbySurveydateandZone.csv")
+
+```{r}
+shorebird_raw<- read.csv("../data/2011_sppbySurveydateandZone.csv")
 
 shorebird_raw$SurveyDate<- as.Date(shorebird_raw$SurveyDate, format = "%m/%d/%Y")
 
