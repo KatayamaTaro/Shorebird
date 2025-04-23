@@ -17,14 +17,11 @@ library(dplyr)
 library(readxl)
 ```
 
-```{r}
-shorebird_xls<- read_excel("./data/Shorebird2011_2024.xls")
-write.csv(shorebird_xls, file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/data/Shorebird_2011_2024.csv")
-```
-
 
 ```{r}
-shorebird_raw<- read.csv("../data/2011_sppbySurveydateandZone.csv")
+getwd()
+setwd("../")
+shorebird_raw<- read.csv("./data/2011_sppbySurveydateandZone.csv")
 
 shorebird_raw$SurveyDate<- as.Date(shorebird_raw$SurveyDate, format = "%m/%d/%Y")
 
@@ -36,7 +33,7 @@ duplicates_specific <- shorebird %>%
   filter(duplicated(select(., SurveyDate, Zone, Bird)) | 
          duplicated(select(., SurveyDate, Zone, Bird), fromLast = TRUE))
 
-# Check for valid zones
+# Check for valid zones, take out any that are not valid
 valid_zones <- c("I", "II", "III", "III Boulders", "III Rocky Outcrop")
 invalid_zones <- shorebird %>%
   filter(!Zone %in% valid_zones)
@@ -45,6 +42,7 @@ invalid_zones <- shorebird %>%
 # Check for valid species
 valid_species <- c("Great Blue Heron", "Great Egret", "Snowy Egret", "People", "Dogs on Leash", "Brown Pelican", "Cormorant", "Black-Bellied Plover", "Willet", "Wandering Tattler", "Spotted Sandpiper", "Marbled Godwit", "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")
 
+#Check if there are species that are not listed on datasheet itself
 invalid_species <- shorebird %>%
   filter(!Bird %in% valid_species)
 
@@ -54,6 +52,7 @@ print(invalid_zones)
 ```
 
 ```{r}
-write.csv(shorebird, file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/data/SHorebird2011-2024.csv")
+#save file of processed raw shorebird data
+write.csv(shorebird, file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/Data/Shorebird2011-2024.csv")
 ```
 

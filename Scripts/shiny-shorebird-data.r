@@ -1,16 +1,3 @@
----
-title: "ShoreBird_Shiny"
-output: html_document
-date: "2024-12-30"
-editor_options: 
-  chunk_output_type: console
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 library(shiny)
 
 # Define UI
@@ -138,5 +125,3 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-```
-

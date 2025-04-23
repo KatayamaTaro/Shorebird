@@ -99,3 +99,22 @@ final_shorebird <- bind_rows(shorebird_and_partial_corrections, unique_correctio
 write.csv(final_shorebird, "./data/Shorebird_FINAL.csv")
 ```
 
+```{r}
+getwd()
+load("./.RData")
+save(list = ls(), file = "C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/Data/my_data.RData")
+ls()
+```
+
+```{r}
+# Replace these with the actual names of your dataframes
+dataframe_names <- c("combined_additions" ,"combined_data_correction", "combined_df", "final_shorebird",  "shorebird_and_partial_corrections", "shorebird_clean","shorebird_data_correction_2012_2018", "shorebird_data_correction_2019_2024", "shorebird_original", "shorebird_processed", "shorebird_replacements",               "unique_corrections")
+for (df_name in dataframe_names) {
+    # Create the file path for each dataframe
+    file_path <- paste0("C:/Users/tkatayama/OneDrive - DOI/Documents/[02] Projects/R/Shorebird_Enter_Data/Data/", df_name, ".csv")
+    
+    # Save the dataframe as a CSV file
+    write.csv(get(df_name), file = file_path, row.names = FALSE)
+}
+```
+
