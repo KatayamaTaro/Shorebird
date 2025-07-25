@@ -1,6 +1,6 @@
-## Shorebird_Data_Entry
+## Shorebird Project
 
-The shorebird enter data project hosts a data folder, scripts folder, and R project. Open the Shorebird_Enter_Data.Rproj to access the scripts in the scripts folder.
+The shorebird data project hosts a data folder, scripts folder, and R project. Open the Shorebird_Enter_Data.Rproj to access the scripts in the scripts folder.
 
 ## To Enter Data: 
 Open the Shorebird_Shiny.rmd file. This r script will create an R Shiny once it is run. The R Shiny that helps CABR staff enter Shorebird survey data from data sheets more efficiently. 
@@ -17,3 +17,5 @@ Enter data by choosing date, zone class, species, and data count. Click submit t
 
 To download your entered data, press the download CSV button. Save in appropriate place with appropriate name.
 
+## Most Up to Date Data
+The most up to date data is the final_shorebird_2011_2024.csv. (update with most up to date dataset here)
