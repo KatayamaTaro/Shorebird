@@ -13,4 +13,7 @@ once you open the Shorebird_Shiny.rmd, click run shown in image below:
 This should load up the r shiny app, which should look like this. 
 <img width="890" height="727" alt="image" src="https://github.com/user-attachments/assets/748294bd-9a44-4cee-bc15-f8a048aee8d6" />
 
-Shiny provides drop down for easy data entry, and spits out a .csv in a readily accessible format for data analysis. Shiny lives in the scripts folder as Shorebird_Shiny. Other scripts are scripts that Biologist used to QA/QC shorebird data from 2011-2024. Data not yet publicly available but will be released on datastore in the future. 
+Enter data by choosing date, zone class, species, and data count. Click submit to enter data. You can remove any errors by clicking on the remove last entry button. Every entry will be recorded under "All Recorded Data" to the right of the dashboard. Last 5 entries will also be shown on top right of dashboard.\
+
+To download your entered data, press the download CSV button. Save in appropriate place with appropriate name.
+
