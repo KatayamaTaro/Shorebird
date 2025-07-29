@@ -1,0 +1,517 @@
+---
+title: "shorebirds"
+author: "antsypants"
+date: "2023-10-03"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+getwd()
+shorebirds_old <- read.csv("./data/Shorebird_Data_Full.csv")
+shorebirds_new<- read.csv("./data/FINAL_Shorebird_2011_2025.csv")
+library(egg)
+library(tidyverse)
+library(ggplot2)
+library(PNWColors)
+library(ggh4x) # for free y-axis
+```
+
+# Data Wrangling
+
+```{r}
+#changing the date to proper date format
+shorebirds_old$SurveyDate<- as.Date(shorebirds_old$SurveyDate, format = "%d-%b-%y")
+#changing the date to proper date format
+shorebirds_new$SurveyDate<- as.Date(shorebirds_new$SurveyDate, format = "%Y-%m-%d")
+
+shorebirds_new<- shorebirds_new%>%
+  filter(DataType != "select species")
+
+
+
+#changing bird names to lower case to keep uniformity
+shorebirds_new$DataType<- str_to_title(shorebirds_new$DataType)
+
+#changing bird names to lower case to keep uniformity
+shorebirds_old$DataType<- str_to_title(shorebirds_old$DataType)
+
+#Curiosity check: Seeing all the unique bird names in old data set
+unique_values_old<- shorebirds_old%>% distinct(DataType)
+#Curiosity check: Seeing all the unique bird names in new data set
+unique_vales_new<- shorebirds_new%>% distinct(DataType)
+
+
+allshore_new<- shorebirds_new%>% expand(ZoneClass, SurveyDate, DataType)
+
+# expanding old dataset to include zeroes
+allshore_old <- shorebirds_old %>% expand(ZoneClass, SurveyDate, DataType)
+
+
+# cleaning up
+shorebirds_clean_old <- shorebirds_old %>%
+  dplyr::right_join(allshore_old) %>%
+  # Boulders & Rocky Outcrop to Zone III
+  mutate(Zone = case_when(
+    ZoneClass == 'I' ~ 'Zone I',
+    ZoneClass == 'II' ~ 'Zone II',
+    ZoneClass == 'III' ~ 'Zone III',
+    ZoneClass == 'Boulders' ~ 'Zone III',
+    ZoneClass == 'Rocky Outcrop' ~ 'Zone III', 
+    TRUE ~ 'X')) %>% 
+  replace(is.na(.), 0)%>%
+  select(-X, -X.1)%>%
+  filter(SurveyDate<= as.Date("2010-12-31"))
+
+# cleaning up
+shorebirds_clean_new <- shorebirds_new %>%
+  dplyr::right_join(allshore_new) %>%
+  # Boulders & Rocky Outcrop to Zone III
+  mutate(Zone = case_when(
+    ZoneClass == 'I' ~ 'Zone I',
+    ZoneClass == 'II' ~ 'Zone II',
+    ZoneClass == 'III' ~ 'Zone III',
+    ZoneClass == 'III Boulders' ~ 'Zone III',
+    ZoneClass == 'III Rocky Outcrop' ~ 'Zone III', 
+    TRUE ~ 'X')) %>% 
+  replace(is.na(.), 0)%>%
+  select(-X)
+
+shorebirds_processed<- shorebirds_clean_old%>%
+  full_join(shorebirds_clean_new)%>%
+  mutate(
+    Month= month(SurveyDate),
+    Year= year(SurveyDate)
+  )%>%
+  select(SurveyDate, Year, Month, ZoneClass, Zone, DataType, DataCount)%>%
+  arrange(SurveyDate, Zone)
+```
+
+```{r}
+# total surveys (monthly for all years) + shorebird means per survey
+shorebirds_surveymeans <- shorebirds_processed %>%
+  select(DataType, DataCount, SurveyDate, Year, Month, Zone) %>% 
+  group_by(Month) %>% 
+  mutate(surveynumber_monthly = n_distinct(SurveyDate, Month),
+         mean_per_survey_monthly=(DataCount/surveynumber_monthly)) %>% 
+  ungroup() %>% 
+  group_by(Year) %>% 
+  mutate(surveynumber_yearly = n_distinct(SurveyDate, Year),
+         mean_per_survey_yearly=(DataCount/surveynumber_yearly)) %>% 
+  ungroup()
+
+# fixed dataset
+shorebirds_fixed <- shorebirds_processed %>% 
+  dplyr::right_join(shorebirds_surveymeans)
+```
+
+# Average Number of Birds/People per Survey
+
+```{r}
+# for Appendix
+surveycounts <- shorebirds_fixed %>% 
+  group_by(Year) %>% 
+  mutate(surveynumber_yearly = n_distinct(SurveyDate)) %>% 
+  summarize(surveytotal=surveynumber_yearly) %>% 
+  distinct(Year, surveytotal, .keep_all = TRUE)
+
+bird_counts <- shorebirds_fixed %>%
+  group_by(DataType, Year) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Dogs On Leash",
+         DataType != "People") %>%
+  ungroup() %>% 
+  group_by(Year) %>% 
+  summarize(birdtotal = sum(DataCount))
+
+people_counts <- shorebirds_fixed %>%
+  group_by(DataType, Year) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Birds") %>%
+  ungroup() %>% 
+  group_by(Year) %>% 
+  summarize(peopletotal = sum(DataCount))
+
+people_counts_byzone <- shorebirds_fixed %>%
+  group_by(DataType, Zone) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Birds") %>%
+  ungroup() %>% 
+  group_by(Zone) %>% 
+  summarize(peopletotal = sum(DataCount))
+
+bird_counts_byzone <- shorebirds_fixed %>%
+  group_by(DataType, Zone) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "People",
+         DataType != "Dogs On Leash") %>%
+  ungroup() %>% 
+  group_by(Zone) %>% 
+  summarize(birdtotal = sum(DataCount))
+
+average_counts <- surveycounts %>%
+  dplyr::right_join(bird_counts) %>%
+  dplyr::right_join(people_counts) %>%
+  group_by(Year, surveytotal) %>% 
+  summarize(average_birds = (birdtotal/surveytotal),
+            average_people = (peopletotal/surveytotal))
+
+write.table(average_counts)
+```
+
+# Base Themes + Other Plot Details
+
+```{r}
+base_theme_45 <- theme(text = element_text(size = 20),
+                    # add more space between panels
+                    panel.spacing = unit(1, 'lines'),
+                    # no background to wrap panels
+                    strip.background = element_blank(),
+                    strip.text = element_text(size = 12, 
+                                              hjust = 0),
+                    # panel labels outside x axis labels
+                    strip.placement = 'outside',
+                    panel.grid = element_blank(),
+                    # adjust x axis labels
+                    axis.text.y = element_text(size = 16),
+                    axis.text.x = element_text(size = 16, 
+                                               angle = 45, 
+                                               hjust = 1))
+
+light_theme_45 <- theme_bw() + base_theme_45
+
+# palettes for graphs
+pal <- pnw_palette(name="Sunset2",n=3,type="discrete")
+pal2 <- pnw_palette(name="Sunset2",n=2,type="discrete")
+pal3 <- pnw_palette(name="Sailboat",n=6,type="discrete")
+pal4 <- pnw_palette(name="Sailboat",n=11,type="continuous")
+
+# graph tags
+my_tag <- c("A) People", "B) Shorebirds")
+my_tag2 <- c("A) Cormorant","B) Great Blue Heron","C) Grebe","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
+my_tag3 <- c("A) Gull","B) Pelican","C) Tern") # common taxa
+
+# taxa grouped under 'common' had an average of >5 obs. for at least one year while taxa grouped under 'uncommon' had an average of <5 obs. for all years.
+```
+
+# People + Shorebirds Data
+
+```{r}
+# across years
+bird_and_visitors_data <- shorebirds_fixed %>%
+  group_by(DataType, Year) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Shorebirds')) %>% 
+  filter(DataType != "Dogs On Leash") %>% 
+  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
+  ungroup() %>%
+  # shorebird data not collected during these years
+  mutate(yeartotal = if_else(Year == "2019" & DataType == "Shorebirds" |
+                             Year == "2020" & DataType == "Shorebirds" |
+                             Year == "1990" & DataType == "Shorebirds", 
+                             NA, yeartotal)) 
+
+# scatterplot for birds and visitors across years
+birdplot <- ggplot(bird_and_visitors_data, aes(x=Year, y=yeartotal, color=DataType)) + 
+  geom_point() + 
+  geom_line() +
+  scale_color_manual(values = pal2) + 
+  geom_smooth(method=lm) +
+  ylab("Mean Observations per Survey") + 
+  facet_grid(DataType~.) +
+  theme(strip.text = element_blank(),
+        axis.title.x = element_text(vjust = -1),
+        axis.title.y = element_text(vjust = +3.5)) +
+  light_theme_45 +
+  theme(legend.position = "none")
+
+birdplotfinal <- tag_facet(birdplot, tag_pool = my_tag, 
+                           open = "", close = "", 
+                           hjust = -0.2, size = 5)
+
+birdplotfinal
+
+# by zone
+bird_and_visitors_data_byzone <- shorebirds_fixed %>%
+  group_by(DataType, Year, Zone) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Shorebirds')) %>% 
+  filter(DataType != "Dogs On Leash") %>% 
+  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
+  ungroup() %>% 
+  mutate(yeartotal = if_else(Year == "2019" & DataType == "Shorebirds" |
+                             Year == "2020" & DataType == "Shorebirds" |
+                             Year == "1990" & DataType == "Shorebirds", 
+                             NA, yeartotal))
+
+birdplot_byzone <- ggplot(bird_and_visitors_data_byzone, 
+                          aes(x=Year, y=yeartotal, color=Zone)) + 
+  geom_point() + 
+  geom_line() +
+  scale_color_manual(values = pal) + 
+  geom_smooth(method=lm) +
+  ylab("Mean Observations per Survey") + 
+  facet_grid(DataType~.) +
+  theme(strip.text = element_blank(),
+        axis.title.x = element_text(vjust = -1),
+        axis.title.y = element_text(vjust = +2)) +
+  light_theme_45
+
+birdplotfinal_byzone <- tag_facet(birdplot_byzone, tag_pool = my_tag, 
+                                  open = "", close = "", 
+                                  hjust = -0.2, size = 5)
+
+birdplotfinal_byzone
+```
+
+# Taxa of Interest
+
+```{r}
+# shorebirds of interest: Oystercatchers, Brown Pelicans, Cormorants, Gulls, Sandpiper, Grebe, Tern, Osprey, Heron. Lumping Gull, Tern, and Sandpiper sp. together.
+
+shorebirds_ofinterest <- shorebirds_fixed %>%
+  filter(DataType %in% c("Oystercatcher",
+                         "Great Blue Heron", 
+                         "Grebe","Osprey",
+                         "Cormorant", 
+                         "Brown Pelican",
+                         "Western Gull",
+                         "Unidentified Gull",
+                         "Ring-Billed Gull",
+                         "Mew Gull",
+                         "Juvenile Gull",
+                         "Herring Gull",
+                         "Heerman's Gull",
+                         "California Gull",
+                         "Bonaparte's Gull",
+                         "Western Sandpiper",
+                         "Spotted Sandpiper",
+                         "American Oystercatcher",
+                         "Black Oystercatcher",
+                         "Pelican",
+                         "Tern",
+                         "Royal Tern",
+                         "Forster's Tern",
+                         "Elegant Tern")) %>%
+  # grouping by taxa...there was probably a better way
+  mutate(DataType = str_replace_all(DataType, 
+                                    fixed("Brown Pelican"), "Pelican"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Western Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Unidentified Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Ring-Billed Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Mew Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Juvenile Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Herring Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Heerman's Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("California Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Bonaparte's Gull"), "Gull"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Western Sandpiper"),
+                                    "Sandpiper"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Spotted Sandpiper"),
+                                    "Sandpiper"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("American Oystercatcher"),
+                                    "Oystercatcher"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Black Oystercatcher"),
+                                    "Oystercatcher"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Royal Tern"), "Tern"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Elegant Tern"), "Tern"),
+         DataType = str_replace_all(DataType, 
+                                    fixed("Forster's Tern"), "Tern"),) %>% 
+  group_by(DataType, Year, Zone) %>%
+  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
+  mutate(yeartotal = if_else(Year == "2019" | 
+                             Year == "2020" | 
+                             Year == "1990", NA, yeartotal))
+
+# separating by common vs uncommon taxa
+shorebirds_ofinterest_high <- shorebirds_ofinterest %>% 
+  filter(DataType %in% c("Gull","Tern","Pelican"))
+
+shorebirds_ofinterest_low <- shorebirds_ofinterest %>% 
+  filter(DataType %in% c("Grebe","Osprey","Oystercatcher","Cormorant","Great Blue Heron","Sandpiper"))
+
+# scatterplots by year
+shorebirds_ofinterest_scatter <- ggplot(shorebirds_ofinterest, 
+                                        aes(x=Year, y=yeartotal,
+                                            color=Zone)) +  
+  geom_line() + 
+  geom_point() + 
+  ylab("Mean Number/Survey") + xlab("Year") +
+  facet_grid(DataType ~ .) + 
+  theme_bw()
+
+shorebirds_ofinterest_scatter
+
+# scatterplot for uncommon taxa across year by zone
+shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,   
+                                           aes(x=Year, y=yeartotal, 
+                                               color=Zone)) +  
+  geom_line() + 
+  geom_point() + 
+  xlab("Year") + 
+  ylab("Mean Observations per Survey") +
+  ggh4x::facet_grid2(DataType ~ ., scales = "free_y", independent = "y") +
+  scale_color_manual(values = pal) +
+  light_theme_45 +
+  theme(strip.text = element_blank(),
+        axis.title.x = element_text(vjust = -0.5),
+        axis.title.y = element_text(vjust = +2.4),
+        axis.text.y = element_text(size = 12))
+
+shorebirds_ofinterest_scatterlow_final <- tag_facet(shorebirds_ofinterest_scatterlow, tag_pool = my_tag2, 
+                                                    open = "", close = "",
+                                                    hjust = -0.05, size = 4)
+
+shorebirds_ofinterest_scatterlow_final
+
+# scatterplot for common taxa across year by zone
+shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
+                                            aes(x=Year, y=yeartotal,      
+                                                color=Zone)) +  
+  geom_line() + 
+  geom_point() + 
+  xlab("Year") + 
+  ylab("Mean Observations per Survey") + 
+  facet_grid(DataType ~ .) + 
+  scale_color_manual(values = pal) +
+  light_theme_45 +
+  theme(strip.text = element_blank(),
+        axis.title.x = element_text(vjust = -0.5),
+        axis.title.y = element_text(vjust = +2.4),
+        axis.text.y = element_text(size = 12))
+
+shorebirds_ofinterest_scatterhigh_final <- tag_facet(shorebirds_ofinterest_scatterhigh, tag_pool = my_tag3, 
+                                                     open = "", close = "", 
+                                                     hjust = -0.05, 
+                                                     size = 4)
+
+shorebirds_ofinterest_scatterhigh_final
+```
+
+# Stacked Bar Chart
+
+```{r}
+shorebirds_stack <- shorebirds_fixed %>%
+  filter(DataType != "Dogs On Leash",
+         DataType != "People") %>% 
+  mutate(DataType = str_replace_all(DataType, fixed("Brown Pelican"), 
+                                    "Pelican"),
+         DataType = str_replace_all(DataType, fixed("Western Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Unidentified Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Ring-Billed Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Mew Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Juvenile Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Herring Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Heerman's Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("California Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Bonaparte's Gull"), 
+                                    "Gull"),
+         DataType = str_replace_all(DataType, fixed("Western Sandpiper"), 
+                                    "Sandpiper"),
+         DataType = str_replace_all(DataType, fixed("Spotted Sandpiper"), 
+                                    "Sandpiper"),
+         DataType = str_replace_all(DataType, fixed("American Oystercatcher"), 
+                                    "Oystercatcher"),
+         DataType = str_replace_all(DataType, fixed("Black Oystercatcher"), 
+                                    "Oystercatcher"),
+         DataType = str_replace_all(DataType, fixed("Royal Tern"), 
+                                    "Tern"),
+         DataType = str_replace_all(DataType, fixed("Elegant Tern"), 
+                                    "Tern"),
+         DataType = str_replace_all(DataType, fixed("Forster's Tern"), 
+                                    "Tern"),) %>% 
+  mutate(DataType = case_when(DataType == 'Gull' ~ 'Gull',
+                              DataType == 'Pelican' ~ 'Pelican',
+                              DataType == 'Cormorant' ~ 'Cormorant',
+                              DataType == 'Great Blue Heron' ~ 'Great Blue 
+                              Heron',
+                              DataType == 'Grebe' ~ 'Grebe',
+                              DataType == 'Osprey' ~ 'Osprey',
+                              DataType == 'Oystercatcher' ~ 'Oystercatcher',
+                              DataType == 'Sandpiper' ~ 'Sandpiper',
+                              DataType == 'Tern' ~ 'Tern',
+                              TRUE ~ 'Others')) %>% 
+  group_by(DataType, Year) %>%
+  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
+  mutate(yeartotal = if_else(Year == "2019" | 
+                             Year == "2020",
+                             NA, yeartotal)) %>% 
+  na.omit() %>%
+  group_by(Year) %>% 
+  mutate(yearlymean_total = sum(yeartotal),
+         proportion = (yeartotal/yearlymean_total))
+
+shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
+                                    levels=c('Cormorant', 
+                                             'Great Blue Heron', 
+                                             'Grebe', 
+                                             'Gull', 
+                                             'Osprey', 
+                                             'Oystercatcher', 
+                                             'Pelican', 
+                                             'Sandpiper', 
+                                             'Tern', 
+                                             'Others'))
+
+shorebirds_stackedplot <- ggplot(shorebirds_stack, 
+                                 aes(x=Year, y=yeartotal, fill=DataType)) +
+  geom_bar(stat = "identity") + 
+  ylab("Mean Observations per Survey") + 
+  labs(fill = "Taxa") +
+  scale_fill_manual(values = pal4) +
+  light_theme_45 + 
+  theme(axis.title.y = element_text(vjust = +2.4))
+
+shorebirds_stackedplot
+
+# extra visual 
+shorebirds_stackedprop <- ggplot(shorebirds_stack, aes(x=Year, y=proportion, fill=DataType)) +
+  geom_bar(stat = "identity") + 
+  ylab("Proportion") + 
+  labs(fill = "Taxa") +
+  scale_fill_manual(values = pal4) +
+  light_theme_45 + 
+  theme(axis.title.y = element_text(vjust = +2.4))
+
+shorebirds_stackedprop
+```

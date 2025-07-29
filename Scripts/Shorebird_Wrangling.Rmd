@@ -118,3 +118,24 @@ for (df_name in dataframe_names) {
 }
 ```
 
+```{r}
+getwd()
+shorebird_2011_2024<- read.csv("./data/final_shorebird_2011_2024.csv")
+
+shorebird_2024_2025<- read.csv("./data/shorebird_data_2024_2025.csv")
+```
+
+```{r}
+#Fix date format
+shorebird_2024_2025$SurveyDate<- as.Date(shorebird_2024_2025$SurveyDate, format = "%m/%d/%Y")
+shorebird_2011_2024$SurveyDate<- as.Date(shorebird_2011_2024$SurveyDate, format = "%Y-%m-%d")
+
+
+shorebird_2011_2024<- shorebird_2011_2024%>%
+  rename(ZoneClass = Zone)
+
+FINAL_Shorebird_2011_2025<- rbind(shorebird_2011_2024, shorebird_2024_2025)
+
+write.csv(FINAL_Shorebird_2011_2025, "./data/FINAL_Shorebird_2011_2025.csv")
+```
+
