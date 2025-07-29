@@ -16,6 +16,8 @@ library(tidyverse)
 library(ggplot2)
 library(PNWColors)
 library(ggh4x) # for free y-axis
+#install.packages("RColorBrewer")
+library(RColorBrewer)
 ```
 
 # Data Wrangling
@@ -197,7 +199,8 @@ light_theme_45 <- theme_bw() + base_theme_45
 pal <- pnw_palette(name="Sunset2",n=3,type="discrete")
 pal2 <- pnw_palette(name="Sunset2",n=2,type="discrete")
 pal3 <- pnw_palette(name="Sailboat",n=6,type="discrete")
-pal4 <- pnw_palette(name="Sailboat",n=11,type="continuous")
+# Define RColorBrewer palette
+pal4 <- brewer.pal(9, "Set2")
 
 # graph tags
 my_tag <- c("A) People", "B) Shorebirds")
@@ -481,10 +484,10 @@ shorebirds_stack <- shorebirds_fixed %>%
   mutate(yearlymean_total = sum(yeartotal),
          proportion = (yeartotal/yearlymean_total))
 
+# Create the factor with levels (Grebe removed)
 shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
                                     levels=c('Cormorant', 
                                              'Great Blue Heron', 
-                                             'Grebe', 
                                              'Gull', 
                                              'Osprey', 
                                              'Oystercatcher', 
@@ -493,16 +496,22 @@ shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
                                              'Tern', 
                                              'Others'))
 
+
+
 shorebirds_stackedplot <- ggplot(shorebirds_stack, 
                                  aes(x=Year, y=yeartotal, fill=DataType)) +
   geom_bar(stat = "identity") + 
   ylab("Mean Observations per Survey") + 
   labs(fill = "Taxa") +
   scale_fill_manual(values = pal4) +
+  scale_x_continuous(breaks = seq(min(shorebirds_stack$Year), 
+                                  max(shorebirds_stack$Year), 
+                                  by = 5)) +  # Shows every year including 2025
   light_theme_45 + 
   theme(axis.title.y = element_text(vjust = +2.4))
 
 shorebirds_stackedplot
+
 
 # extra visual 
 shorebirds_stackedprop <- ggplot(shorebirds_stack, aes(x=Year, y=proportion, fill=DataType)) +
@@ -510,6 +519,9 @@ shorebirds_stackedprop <- ggplot(shorebirds_stack, aes(x=Year, y=proportion, fil
   ylab("Proportion") + 
   labs(fill = "Taxa") +
   scale_fill_manual(values = pal4) +
+  scale_x_continuous(breaks = seq(min(shorebirds_stack$Year), 
+                                  max(shorebirds_stack$Year), 
+                                  by = 5)) +  # Shows every year including 2025
   light_theme_45 + 
   theme(axis.title.y = element_text(vjust = +2.4))
 
