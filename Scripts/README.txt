@@ -5,3 +5,4 @@ On the app, "Survey Date:" refers to the date that the survey was taken. "Zone C
 
 Shorebird_Wrangling.Rmd- Creates a final processed dataset that includes all the corrections. Note some of the files that the script calls for is missing. 
 
+Shorebird_Analysis.Rmd- Takes the full shorebird dataset, preps data for analysis and generates a few basic analysis/plots. 
