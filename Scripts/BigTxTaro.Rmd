@@ -271,6 +271,9 @@ birdplot_byzone <- ggplot(bird_and_visitors_data_byzone,
   scale_color_manual(values = pal) + 
   geom_smooth(method=lm) +
   ylab("Mean Observations per Survey") + 
+  scale_x_continuous(breaks = seq(from = min(bird_and_visitors_data_byzone$Year), 
+                                  to = max(bird_and_visitors_data_byzone$Year), 
+                                  by = 5)) +
   facet_grid(DataType~.) +
   theme(strip.text = element_blank(),
         axis.title.x = element_text(vjust = -1),
