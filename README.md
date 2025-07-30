@@ -3,7 +3,7 @@
 The shorebird data project hosts a data folder, scripts folder, and R project. Open the Shorebird_Enter_Data.Rproj to access the scripts in the scripts folder. Notice, the data folder is hidden from this repository. Shorebird data will be made publicly available on NPS Datastore in near future when the Cabrillo National Monument Shorebirds report is published. 
 
 ## To Enter Data: 
-Open the Shorebird_Shiny.rmd file. This r script will create an R Shiny once it is run. The R Shiny that helps CABR staff enter Shorebird survey data from data sheets more efficiently. 
+Open the Shorebird_Shiny.rmd file in Shorebird/Scripts/Shorebird_Shiny.rdmd. This r script will create an R Shiny once it is run. The R Shiny that helps CABR staff enter Shorebird survey data from data sheets more efficiently. 
 
 Background on R Shiny if you are unfamiliar: R Shiny is an R package that makes it easy to build interactive web applications directly from R. It allows users to create web-based dashboards and visualizations without needing extensive web development skills. In our case, the Shiny application helps the user easily enter the shorebird data, and at the end save the csv file to the data folder. 
 
