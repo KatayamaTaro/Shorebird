@@ -1,6 +1,6 @@
 ## Shorebird Project
 
-The shorebird data project hosts a data folder, scripts folder, and R project. Open the Shorebird_Enter_Data.Rproj to access the scripts in the scripts folder.
+The shorebird data project hosts a data folder, scripts folder, and R project. Open the Shorebird_Enter_Data.Rproj to access the scripts in the scripts folder. Notice, the data folder is hidden from this repository. Shorebird data will be made publicly available on NPS Datastore in near future when the Cabrillo National Monument Shorebirds report is published. 
 
 ## To Enter Data: 
 Open the Shorebird_Shiny.rmd file. This r script will create an R Shiny once it is run. The R Shiny that helps CABR staff enter Shorebird survey data from data sheets more efficiently. 
