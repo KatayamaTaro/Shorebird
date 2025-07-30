@@ -8,6 +8,8 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+#This shorebird access wrangling script takes the raw data from access and outputs a dataset that is tidier and easier to work with. 
 ```
 
 ```{r}
