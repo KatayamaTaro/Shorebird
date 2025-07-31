@@ -1,6 +1,6 @@
 ## Shorebird Project
 
-**Shiny app that helps you enter shorebird data**
+Shorebird monitoring project at Cabrillo National Monument. Shorebird sampling spans from 1990-2025. Repository includes R shiny that aids user in entering data. Data cleaning and analysis scripts also provided
 
 ---
 
