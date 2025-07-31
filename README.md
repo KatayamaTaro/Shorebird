@@ -4,6 +4,9 @@ Shorebird monitoring project at Cabrillo National Monument. Shorebird sampling s
 
 ---
 
+<div align="center">
+  <img src="https://github.com/taroNPS/Shorebird/tree/main/Images/Picture1.jpg" width="500">
+   
 ### Overview
 
 Shorebird is an R Shiny application designed to assist CABR staff in entering and managing shorebird survey data. It provides a simple interface for data entry, error correction, and CSV export. The project also organizes scripts, reports, and data to streamline survey management.
