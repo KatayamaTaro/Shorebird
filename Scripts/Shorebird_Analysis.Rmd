@@ -88,6 +88,9 @@ shorebirds_processed<- shorebirds_clean_old%>%
   )%>%
   select(SurveyDate, Year, Month, ZoneClass, Zone, DataType, DataCount)%>%
   arrange(SurveyDate, Zone)
+
+#save processed datasheets in Data folder
+write.csv(shorebirds_processed, file = "./Data/Shorebirds_processed_1990_2025.csv")
 ```
 
 ```{r}
@@ -172,6 +175,41 @@ average_counts <- surveycounts %>%
             average_people = (peopletotal/surveytotal))
 
 write.table(average_counts)
+
+#exploratory analysis of survey number through years
+plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
+  # Add points for individual data points
+  geom_point(alpha = 0.6, size = 2, color = "steelblue") +
+  # Add a smooth line connecting the points
+  geom_line(alpha = 0.7, color = "steelblue") +
+  # Add horizontal line for overall mean
+  geom_hline(aes(yintercept = mean(surveytotal, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", size = 1) +
+  # Add labels and title
+  labs(
+    title = "Survey Total by Year",
+    subtitle = "Red dashed line shows overall mean survey total",
+    x = "Year",
+    y = "Survey Total",
+    caption = "Data source: surveycount dataset"
+  ) +
+  # Apply a clean theme
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12, color = "gray60"),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10)
+  ) +
+  # Format x-axis to show years clearly
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))
+
+# Display the plot
+print(plot)
+
+# Optional: Calculate and display the mean value
+mean_surveytotal <- mean(surveycounts$surveytotal, na.rm = TRUE)
+cat("Overall mean survey total:", round(mean_surveytotal, 2), "\n")
 ```
 
 # Base Themes + Other Plot Details
@@ -224,9 +262,7 @@ bird_and_visitors_data <- shorebirds_fixed %>%
   summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
   ungroup() %>%
   # shorebird data not collected during these years
-  mutate(yeartotal = if_else(Year == "2019" & DataType == "Shorebirds" |
-                             Year == "2020" & DataType == "Shorebirds" |
-                             Year == "1990" & DataType == "Shorebirds", 
+  mutate(yeartotal = if_else(Year == "1990" & DataType == "Shorebirds", 
                              NA, yeartotal)) 
 
 # scatterplot for birds and visitors across years
@@ -259,9 +295,7 @@ bird_and_visitors_data_byzone <- shorebirds_fixed %>%
   filter(DataType != "Dogs On Leash") %>% 
   summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
   ungroup() %>% 
-  mutate(yeartotal = if_else(Year == "2019" & DataType == "Shorebirds" |
-                             Year == "2020" & DataType == "Shorebirds" |
-                             Year == "1990" & DataType == "Shorebirds", 
+  mutate(yeartotal = if_else(Year == "1990" & DataType == "Shorebirds", 
                              NA, yeartotal))
 
 birdplot_byzone <- ggplot(bird_and_visitors_data_byzone, 
@@ -357,9 +391,7 @@ shorebirds_ofinterest <- shorebirds_fixed %>%
                                     fixed("Forster's Tern"), "Tern"),) %>% 
   group_by(DataType, Year, Zone) %>%
   summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
-  mutate(yeartotal = if_else(Year == "2019" | 
-                             Year == "2020" | 
-                             Year == "1990", NA, yeartotal))
+  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal))
 
 # separating by common vs uncommon taxa
 shorebirds_ofinterest_high <- shorebirds_ofinterest %>% 
@@ -479,9 +511,7 @@ shorebirds_stack <- shorebirds_fixed %>%
                               TRUE ~ 'Others')) %>% 
   group_by(DataType, Year) %>%
   summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
-  mutate(yeartotal = if_else(Year == "2019" | 
-                             Year == "2020",
-                             NA, yeartotal)) %>% 
+  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal)) %>% 
   na.omit() %>%
   group_by(Year) %>% 
   mutate(yearlymean_total = sum(yeartotal),
@@ -501,8 +531,9 @@ shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
 
 
 
+
 shorebirds_stackedplot <- ggplot(shorebirds_stack, 
-                                 aes(x=Year, y=yeartotal, fill=DataType)) +
+                                 aes(x = Year, y = yeartotal, fill = DataType)) +
   geom_bar(stat = "identity") + 
   ylab("Mean Observations per Survey") + 
   labs(fill = "Taxa") +
