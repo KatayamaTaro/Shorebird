@@ -320,8 +320,30 @@ birdplot_byzone <- ggplot(bird_and_visitors_data_byzone,
 birdplotfinal_byzone <- tag_facet(birdplot_byzone, tag_pool = my_tag, 
                                   open = "", close = "", 
                                   hjust = -0.2, size = 5)
-
+#Plot mean observations per survey
 birdplotfinal_byzone
+
+# Create the "plots" folder in the root directory
+output_dir <- "plots"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+  cat("Created 'plots' folder in root directory\n")
+} else {
+  cat("'plots' folder already exists\n")
+}
+
+# Save the birdplotfinal_byzone plot using the specified convention
+# You'll need to define these variables according to your specific case:
+site_name <- "your_site_name"        # Replace with your actual site name
+target_assemblage <- "bird"          # Replace with your assemblage type
+
+# Save the plot
+ggsave(filename = file.path(output_dir, paste(site_name, target_assemblage, "byzone_plot.png", sep = "_")), 
+       plot = birdplotfinal_byzone, 
+       width = 6, 
+       height = 4)
+
+cat("Plot saved successfully!\n")
 ```
 
 # Taxa of Interest
