@@ -18,6 +18,15 @@ library(PNWColors)
 library(ggh4x) # for free y-axis
 #install.packages("RColorBrewer")
 library(RColorBrewer)
+
+# Create the "plots" folder in the root directory
+output_dir <- "plots"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+  cat("Created 'plots' folder in root directory\n")
+} else {
+  cat("'plots' folder already exists\n")
+}
 ```
 
 # Data Wrangling
@@ -174,7 +183,7 @@ average_counts <- surveycounts %>%
   summarize(average_birds = (birdtotal/surveytotal),
             average_people = (peopletotal/surveytotal))
 
-write.table(average_counts)
+write.table(average_counts, file = file.path(output_dir,"survey_count.txt"), sep = "\t")
 
 #exploratory analysis of survey number through years
 plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
@@ -323,20 +332,56 @@ birdplotfinal_byzone <- tag_facet(birdplot_byzone, tag_pool = my_tag,
 #Plot mean observations per survey
 birdplotfinal_byzone
 
-# Create the "plots" folder in the root directory
-output_dir <- "plots"
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir)
-  cat("Created 'plots' folder in root directory\n")
-} else {
-  cat("'plots' folder already exists\n")
-}
-
 # Save the plot
 ggsave(filename = file.path(output_dir,"BirdAndPeople.png"), 
        plot = birdplotfinal_byzone, 
        width = 6, 
        height = 5)
+
+# Test significance of trends
+trend_results <- data.frame()
+
+# Get unique combinations
+datatypes <- unique(bird_and_visitors_data_byzone$DataType)
+zones <- unique(bird_and_visitors_data_byzone$Zone)
+
+#for loop to calculate the summary statistics and store in trend results dataframe
+for(dt in datatypes) {
+  for(z in zones) {
+    
+    # Subset data for this combination
+    subset_data <- bird_and_visitors_data_byzone[
+      bird_and_visitors_data_byzone$DataType == dt & 
+      bird_and_visitors_data_byzone$Zone == z, ]
+    
+    # Only proceed if we have enough data points
+    if(nrow(subset_data) > 2) {
+      
+      # Fit linear model
+      model <- lm(yeartotal ~ Year, data = subset_data)
+      model_summary <- summary(model)
+      
+      # Extract statistics
+      slope <- model_summary$coefficients["Year", "Estimate"]
+      p_value <- model_summary$coefficients["Year", "Pr(>|t|)"]
+      r_squared <- model_summary$r.squared
+      
+      # Store results
+      trend_results <- rbind(trend_results, data.frame(
+        DataType = dt,
+        Zone = z,
+        slope = slope,
+        p_value = p_value,
+        r_squared = r_squared,
+        significant = p_value < 0.05,
+        stringsAsFactors = FALSE
+      ))
+    }
+  }
+}
+
+# View results
+print(trend_results)
 ```
 
 # Taxa of Interest
