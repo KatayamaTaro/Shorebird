@@ -1,6 +1,6 @@
 ---
 title: "shorebirds"
-author: "antsypants"
+author: "Anthony Truong and Taro Katayama"
 date: "2023-10-03"
 output: html_document
 editor_options: 
