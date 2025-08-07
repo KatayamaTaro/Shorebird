@@ -247,6 +247,7 @@ plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
 # Display the plot
 print(plot)
 
+#Remove intermediary datasets
 rm(surveycounts, bird_counts, people_counts, plot)
 ```
 
@@ -284,7 +285,7 @@ scale_color_manual(values = taropal)
 
 # graph tags
 my_tag <- c("A) People", "B) Shorebirds")
-my_tag2 <- c("A) Cormorant","B) Great Blue Heron","C) Grebe","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
+my_tag2 <- c("A) Cormorant","B) Great Blue Heron","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
 my_tag3 <- c("A) Gull","B) Pelican","C) Tern") # common taxa
 
 # taxa grouped under 'common' had an average of >5 obs. for at least one year while taxa grouped under 'uncommon' had an average of <5 obs. for all years.
@@ -417,79 +418,33 @@ print(trend_results)
 #Save the trend analysis
 write_xlsx(trend_results, file.path(output_dir, "trend_results.xlsx"))
 
+#Remove intermediary datasets
 rm(bird_and_visitors_data, bird_and_visitors_data_byzone, birdplotfinal, birdplot, birdplot_byzone, model, model_summary, subset_data)
 ```
 
-# Taxa of Interest
+# Taxa of Interest Plot Generation
 
 ```{r}
 # shorebirds of interest: Oystercatchers, Brown Pelicans, Cormorants, Gulls, Sandpiper, Grebe, Tern, Osprey, Heron. Lumping Gull, Tern, and Sandpiper sp. together.
-
 shorebirds_ofinterest <- shorebirds_fixed %>%
-  filter(DataType %in% c("Oystercatcher",
-                         "Great Blue Heron", 
-                         "Grebe","Osprey",
-                         "Cormorant", 
-                         "Brown Pelican",
-                         "Western Gull",
-                         "Unidentified Gull",
-                         "Ring-Billed Gull",
-                         "Mew Gull",
-                         "Juvenile Gull",
-                         "Herring Gull",
-                         "Heerman's Gull",
-                         "California Gull",
-                         "Bonaparte's Gull",
-                         "Western Sandpiper",
-                         "Spotted Sandpiper",
-                         "American Oystercatcher",
-                         "Black Oystercatcher",
-                         "Pelican",
-                         "Tern",
-                         "Royal Tern",
-                         "Forster's Tern",
-                         "Elegant Tern")) %>%
-  # grouping by taxa...there was probably a better way
-  mutate(DataType = str_replace_all(DataType, 
-                                    fixed("Brown Pelican"), "Pelican"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Western Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Unidentified Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Ring-Billed Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Mew Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Juvenile Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Herring Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Heerman's Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("California Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Bonaparte's Gull"), "Gull"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Western Sandpiper"),
-                                    "Sandpiper"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Spotted Sandpiper"),
-                                    "Sandpiper"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("American Oystercatcher"),
-                                    "Oystercatcher"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Black Oystercatcher"),
-                                    "Oystercatcher"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Royal Tern"), "Tern"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Elegant Tern"), "Tern"),
-         DataType = str_replace_all(DataType, 
-                                    fixed("Forster's Tern"), "Tern"),) %>% 
+  filter(DataType %in% c("Oystercatcher", "Great Blue Heron", "Grebe", "Osprey",
+                         "Cormorant", "Brown Pelican", "Western Gull", 
+                         "Unidentified Gull", "Ring-Billed Gull", "Mew Gull",
+                         "Juvenile Gull", "Herring Gull", "Heerman's Gull",
+                         "California Gull", "Bonaparte's Gull", "Western Sandpiper",
+                         "Spotted Sandpiper", "American Oystercatcher", 
+                         "Black Oystercatcher", "Pelican", "Tern", "Royal Tern",
+                         "Forster's Tern", "Elegant Tern")) %>%
+  mutate(DataType = case_when(
+    str_detect(DataType, "Gull") ~ "Gull",
+    str_detect(DataType, "Sandpiper") ~ "Sandpiper", 
+    str_detect(DataType, "Oystercatcher") ~ "Oystercatcher",
+    str_detect(DataType, "Tern") ~ "Tern",
+    DataType == "Brown Pelican" ~ "Pelican",
+    TRUE ~ DataType  # Keep original value for all others
+  )) %>%
   group_by(DataType, Year, Zone) %>%
-  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
+  summarize(yeartotal = sum(mean_per_survey_yearly), .groups = "drop") %>%
   mutate(yeartotal = if_else(Year == "1990", NA, yeartotal))
 
 # separating by common vs uncommon taxa
@@ -497,19 +452,7 @@ shorebirds_ofinterest_high <- shorebirds_ofinterest %>%
   filter(DataType %in% c("Gull","Tern","Pelican"))
 
 shorebirds_ofinterest_low <- shorebirds_ofinterest %>% 
-  filter(DataType %in% c("Grebe","Osprey","Oystercatcher","Cormorant","Great Blue Heron","Sandpiper"))
-
-# scatterplots by year
-shorebirds_ofinterest_scatter <- ggplot(shorebirds_ofinterest, 
-                                        aes(x=Year, y=yeartotal,
-                                            color=Zone)) +  
-  geom_line() + 
-  geom_point() + 
-  ylab("Mean Number/Survey") + xlab("Year") +
-  facet_grid(DataType ~ .) + 
-  theme_bw()
-
-shorebirds_ofinterest_scatter
+  filter(DataType %in% c("Osprey","Oystercatcher","Cormorant","Great Blue Heron","Sandpiper"))
 
 # scatterplot for uncommon taxa across year by zone
 shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,   
@@ -521,12 +464,16 @@ shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,
   ylab("Mean Observations per Survey") +
   ggh4x::facet_grid2(DataType ~ ., scales = "free_y", independent = "y") +
   scale_color_manual(values = pal) +
+    scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
+                                  max(shorebirds_ofinterest_low$Year), 
+                                  by = 5)) +
   light_theme_45 +
   theme(strip.text = element_blank(),
         axis.title.x = element_text(vjust = -0.5),
         axis.title.y = element_text(vjust = +2.4),
         axis.text.y = element_text(size = 12))
 
+# Create plot with correct tags (which are labels for each species in subplot)
 shorebirds_ofinterest_scatterlow_final <- tag_facet(shorebirds_ofinterest_scatterlow, tag_pool = my_tag2, 
                                                     open = "", close = "",
                                                     hjust = -0.2, size = 4)
@@ -547,13 +494,14 @@ shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
   geom_point() + 
   xlab("Year") + 
   ylab("Mean Observations per Survey") + 
-    scale_x_continuous(breaks = seq(min(shorebirds_ofinterest_high$Year), 
+      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
                                   max(shorebirds_ofinterest_high$Year), 
                                   by = 5)) +  # Shows every year including 2025
   facet_grid(DataType ~ .) + 
   scale_color_manual(values = pal) +
   light_theme_45
 
+# Create plot with correct tags (which are labels for each species in subplot)
 shorebirds_ofinterest_scatterhigh_final <- tag_facet(shorebirds_ofinterest_scatterhigh, tag_pool = my_tag3, 
                                                      open = "", close = "", 
                                                      hjust = -0.2, size = 4)
@@ -565,64 +513,34 @@ ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"),
        plot = shorebirds_ofinterest_scatterhigh_final, 
        width = 6, 
        height = 5)
+
+# Remove intermediary datasets
+rm(shorebirds_ofinterest_high, shorebirds_ofinterest_low, shorebirds_ofinterest_scatter, shorebirds_ofinterest_scatterlow, shorebirds_ofinterest_scatterhigh)
 ```
 
 # Stacked Bar Chart
 
 ```{r}
+# Shorebird groups
 shorebirds_stack <- shorebirds_fixed %>%
-  filter(DataType != "Dogs On Leash",
-         DataType != "People") %>% 
-  mutate(DataType = str_replace_all(DataType, fixed("Brown Pelican"), 
-                                    "Pelican"),
-         DataType = str_replace_all(DataType, fixed("Western Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Unidentified Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Ring-Billed Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Mew Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Juvenile Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Herring Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Heerman's Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("California Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Bonaparte's Gull"), 
-                                    "Gull"),
-         DataType = str_replace_all(DataType, fixed("Western Sandpiper"), 
-                                    "Sandpiper"),
-         DataType = str_replace_all(DataType, fixed("Spotted Sandpiper"), 
-                                    "Sandpiper"),
-         DataType = str_replace_all(DataType, fixed("American Oystercatcher"), 
-                                    "Oystercatcher"),
-         DataType = str_replace_all(DataType, fixed("Black Oystercatcher"), 
-                                    "Oystercatcher"),
-         DataType = str_replace_all(DataType, fixed("Royal Tern"), 
-                                    "Tern"),
-         DataType = str_replace_all(DataType, fixed("Elegant Tern"), 
-                                    "Tern"),
-         DataType = str_replace_all(DataType, fixed("Forster's Tern"), 
-                                    "Tern"),) %>% 
-  mutate(DataType = case_when(DataType == 'Gull' ~ 'Gull',
-                              DataType == 'Pelican' ~ 'Pelican',
-                              DataType == 'Cormorant' ~ 'Cormorant',
-                              DataType == 'Great Blue Heron' ~ 'Great Blue Heron',
-                              DataType == 'Osprey' ~ 'Osprey',
-                              DataType == 'Oystercatcher' ~ 'Oystercatcher',
-                              DataType == 'Sandpiper' ~ 'Sandpiper',
-                              DataType == 'Tern' ~ 'Tern',
-                              TRUE ~ 'Others')) %>% 
+  filter(!DataType %in% c("Dogs On Leash", "People")) %>%
+  mutate(DataType = case_when(
+    str_detect(DataType, "Gull") ~ "Gull",
+    str_detect(DataType, "Sandpiper") ~ "Sandpiper", 
+    str_detect(DataType, "Oystercatcher") ~ "Oystercatcher",
+    str_detect(DataType, "Tern") ~ "Tern",
+    DataType == "Brown Pelican" ~ "Pelican",
+    DataType %in% c("Pelican", "Cormorant", "Great Blue Heron", 
+                   "Osprey", "Grebe") ~ DataType,
+    TRUE ~ "Others"
+  )) %>%
   group_by(DataType, Year) %>%
-  summarize(yeartotal=sum(mean_per_survey_yearly)) %>% 
-  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal)) %>% 
+  summarize(yeartotal = sum(mean_per_survey_yearly), .groups = "drop") %>%
+  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal)) %>%
   na.omit() %>%
-  group_by(Year) %>% 
+  group_by(Year) %>%
   mutate(yearlymean_total = sum(yeartotal),
-         proportion = (yeartotal/yearlymean_total))
+         proportion = yeartotal / yearlymean_total)
 
 # Create the factor with levels (Grebe removed)
 shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
@@ -636,6 +554,7 @@ shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
                                              'Tern', 
                                              'Others'))
 
+#Shorebird stacked plot
 shorebirds_stackedplot <- ggplot(shorebirds_stack, 
                                  aes(x = Year, y = yeartotal, fill = DataType)) +
   geom_bar(stat = "identity") + 
@@ -675,4 +594,6 @@ ggsave(filename = file.path(output_dir,"shorebird_stacked_prop.png"),
        plot = shorebirds_stackedprop, 
        width = 6, 
        height = 5)
+
+rm(shorebirds_stack)
 ```
