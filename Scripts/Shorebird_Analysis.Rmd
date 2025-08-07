@@ -6,20 +6,33 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
+# Setting up environment
 
 ```{r setup, include=FALSE}
-getwd()
-shorebirds_old <- read.csv("./data/Shorebird_Data_Full.csv")
-shorebirds_new<- read.csv("./data/FINAL_Shorebird_2011_2025.csv")
+
+#install.packages(egg)
 library(egg)
+#install.packages(tidyverse)
 library(tidyverse)
+#install.packages(ggplot2)
 library(ggplot2)
+#install.packages(PNWColors)
 library(PNWColors)
+#install.packages("ggh4x)
 library(ggh4x) # for free y-axis
 #install.packages("RColorBrewer")
 library(RColorBrewer)
+#install.packages("writexl")
+library(writexl)
 
-# Create the "plots" folder in the root directory
+#get working directory, should be set to root Shorebirds folder!
+getwd()
+
+#Load in shorebird data
+shorebirds_old <- read.csv("./Data/Shorebird_Data_Full.csv")
+shorebirds_new<- read.csv("./Data/FINAL_Shorebird_2011_2025.csv")
+
+# Create the "plots" folder in the root directory, if already present, it ignores command
 output_dir <- "plots"
 if (!dir.exists(output_dir)) {
   dir.create(output_dir)
@@ -34,29 +47,30 @@ if (!dir.exists(output_dir)) {
 ```{r}
 #changing the date to proper date format
 shorebirds_old$SurveyDate<- as.Date(shorebirds_old$SurveyDate, format = "%d-%b-%y")
+
 #changing the date to proper date format
 shorebirds_new$SurveyDate<- as.Date(shorebirds_new$SurveyDate, format = "%Y-%m-%d")
 
+#Gets rid of wrongly entered entry
 shorebirds_new<- shorebirds_new%>%
   filter(DataType != "select species")
 
-
-
-#changing bird names to lower case to keep uniformity
+#Capitalize every single bird name
 shorebirds_new$DataType<- str_to_title(shorebirds_new$DataType)
 
-#changing bird names to lower case to keep uniformity
+#Capitalize every single bird name
 shorebirds_old$DataType<- str_to_title(shorebirds_old$DataType)
 
 #Curiosity check: Seeing all the unique bird names in old data set
 unique_values_old<- shorebirds_old%>% distinct(DataType)
+
 #Curiosity check: Seeing all the unique bird names in new data set
 unique_vales_new<- shorebirds_new%>% distinct(DataType)
 
-
+#Expand new dataset to include zeroes
 allshore_new<- shorebirds_new%>% expand(ZoneClass, SurveyDate, DataType)
 
-# expanding old dataset to include zeroes
+#Expanding old dataset to include zeroes
 allshore_old <- shorebirds_old %>% expand(ZoneClass, SurveyDate, DataType)
 
 
@@ -89,6 +103,7 @@ shorebirds_clean_new <- shorebirds_new %>%
   replace(is.na(.), 0)%>%
   select(-X)
 
+# Joining old shorebird dataset and new shorebird dataset
 shorebirds_processed<- shorebirds_clean_old%>%
   full_join(shorebirds_clean_new)%>%
   mutate(
@@ -98,9 +113,14 @@ shorebirds_processed<- shorebirds_clean_old%>%
   select(SurveyDate, Year, Month, ZoneClass, Zone, DataType, DataCount)%>%
   arrange(SurveyDate, Zone)
 
-#save processed datasheets in Data folder
+#save PROCESSED/CLEAN DATASET TO DATA FOLDER!!
 write.csv(shorebirds_processed, file = "./Data/Shorebirds_processed_1990_2025.csv")
+
+#Removing intermediary datasets
+rm(shorebirds_clean_new, shorebirds_clean_old, allshore_new, allshore_old, unique_vales_new, unique_values_old,shorebirds_new, shorebirds_old)
 ```
+
+# Setting up dataset for analysis
 
 ```{r}
 # total surveys (monthly for all years) + shorebird means per survey
@@ -118,18 +138,24 @@ shorebirds_surveymeans <- shorebirds_processed %>%
 # fixed dataset
 shorebirds_fixed <- shorebirds_processed %>% 
   dplyr::right_join(shorebirds_surveymeans)
+
+#Remove intermediary dataset
+rm(shorebirds_surveymeans)
 ```
 
-# Average Number of Birds/People per Survey
+# Summary statistics
 
 ```{r}
 # for Appendix
+
+#Yearly Survey Count
 surveycounts <- shorebirds_fixed %>% 
   group_by(Year) %>% 
   mutate(surveynumber_yearly = n_distinct(SurveyDate)) %>% 
   summarize(surveytotal=surveynumber_yearly) %>% 
   distinct(Year, surveytotal, .keep_all = TRUE)
 
+#Bird count sum by year
 bird_counts <- shorebirds_fixed %>%
   group_by(DataType, Year) %>% 
   mutate(DataType = case_when(
@@ -142,6 +168,7 @@ bird_counts <- shorebirds_fixed %>%
   group_by(Year) %>% 
   summarize(birdtotal = sum(DataCount))
 
+#People count sum by year (including dogs)
 people_counts <- shorebirds_fixed %>%
   group_by(DataType, Year) %>% 
   mutate(DataType = case_when(
@@ -153,6 +180,7 @@ people_counts <- shorebirds_fixed %>%
   group_by(Year) %>% 
   summarize(peopletotal = sum(DataCount))
 
+#People count by zone
 people_counts_byzone <- shorebirds_fixed %>%
   group_by(DataType, Zone) %>% 
   mutate(DataType = case_when(
@@ -164,6 +192,7 @@ people_counts_byzone <- shorebirds_fixed %>%
   group_by(Zone) %>% 
   summarize(peopletotal = sum(DataCount))
 
+#bird Count by zone
 bird_counts_byzone <- shorebirds_fixed %>%
   group_by(DataType, Zone) %>% 
   mutate(DataType = case_when(
@@ -176,6 +205,7 @@ bird_counts_byzone <- shorebirds_fixed %>%
   group_by(Zone) %>% 
   summarize(birdtotal = sum(DataCount))
 
+#average count of birds and people by year
 average_counts <- surveycounts %>%
   dplyr::right_join(bird_counts) %>%
   dplyr::right_join(people_counts) %>%
@@ -183,7 +213,8 @@ average_counts <- surveycounts %>%
   summarize(average_birds = (birdtotal/surveytotal),
             average_people = (peopletotal/surveytotal))
 
-write.table(average_counts, file = file.path(output_dir,"survey_count.txt"), sep = "\t")
+#Save average count of birds and people by year to plots folder
+write_xlsx(average_counts, file.path(output_dir,"survey_count.xlsx"))
 
 #exploratory analysis of survey number through years
 plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
@@ -216,14 +247,13 @@ plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
 # Display the plot
 print(plot)
 
-# Optional: Calculate and display the mean value
-mean_surveytotal <- mean(surveycounts$surveytotal, na.rm = TRUE)
-cat("Overall mean survey total:", round(mean_surveytotal, 2), "\n")
+rm(surveycounts, bird_counts, people_counts, plot)
 ```
 
 # Base Themes + Other Plot Details
 
 ```{r}
+#Create base theme for all plots
 base_theme_45 <- theme(text = element_text(size = 15),
                     # add more space between panels
                     panel.spacing = unit(1, 'lines'),
@@ -260,10 +290,10 @@ my_tag3 <- c("A) Gull","B) Pelican","C) Tern") # common taxa
 # taxa grouped under 'common' had an average of >5 obs. for at least one year while taxa grouped under 'uncommon' had an average of <5 obs. for all years.
 ```
 
-# People + Shorebirds Data
+# People + Shorebirds Data Analysis
 
 ```{r}
-# across years
+# Mean count per year of bird and people data
 bird_and_visitors_data <- shorebirds_fixed %>%
   group_by(DataType, Year) %>% 
   mutate(DataType = case_when(
@@ -277,7 +307,7 @@ bird_and_visitors_data <- shorebirds_fixed %>%
   mutate(yeartotal = if_else(Year == "1990" & DataType == "Shorebirds", 
                              NA, yeartotal)) 
 
-# scatterplot for birds and visitors across years
+# scatterplot for birds and visitors across years (NOT DIFFERENTIATING ZONES)
 birdplot <- ggplot(bird_and_visitors_data, aes(x=Year, y=yeartotal, color=DataType)) + 
   geom_point() + 
   geom_line() +
@@ -297,7 +327,7 @@ birdplotfinal <- tag_facet(birdplot, tag_pool = my_tag,
 
 birdplotfinal
 
-# by zone
+# birds and visitors across years by zone
 bird_and_visitors_data_byzone <- shorebirds_fixed %>%
   group_by(DataType, Year, Zone) %>% 
   mutate(DataType = case_when(
@@ -310,6 +340,7 @@ bird_and_visitors_data_byzone <- shorebirds_fixed %>%
   mutate(yeartotal = if_else(Year == "1990" & DataType == "Shorebirds", 
                              NA, yeartotal))
 
+# Scatterplot of birds and people by zone
 birdplot_byzone <- ggplot(bird_and_visitors_data_byzone, 
                           aes(x=Year, y=yeartotal, color=Zone)) + 
   geom_point() + 
@@ -382,6 +413,11 @@ for(dt in datatypes) {
 
 # View results
 print(trend_results)
+
+#Save the trend analysis
+write_xlsx(trend_results, file.path(output_dir, "trend_results.xlsx"))
+
+rm(bird_and_visitors_data, bird_and_visitors_data_byzone, birdplotfinal, birdplot, birdplot_byzone, model, model_summary, subset_data)
 ```
 
 # Taxa of Interest
