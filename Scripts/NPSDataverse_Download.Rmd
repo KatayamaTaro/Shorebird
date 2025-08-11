@@ -1,0 +1,17 @@
+---
+title: "Shorebird Data Package"
+output: html_document
+date: "2025-08-08"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#options(download.file.method = "wininet")
+#devtools::install_github("nationalparkservice/NPSdataverse")
+
+library(NPSdataverse)
+
+
+```
+
