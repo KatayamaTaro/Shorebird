@@ -38,6 +38,8 @@ devtools::install_github("nationalparkservice/NPSdataverse")
 # development.
 library(NPSdataverse)
 library(tidyverse)
+#install.packages("ISOcodes")
+library(ISOcodes)
 ```
 
 ## Set the overall package details
@@ -64,7 +66,8 @@ data_type <- "ongoing"
 #### Path to data file(s)
 Tell R where your data files are. If they are in the working directory, you can set the working_folder to `getwd()`. If they are in a different directory you will need to specify that directory.
 ```{r working_dir}
-working_folder <- getwd()
+getwd()
+working_folder <- file.path("C:/Users/tkatayama/OneDrive - DOI/Documents/Projects/R/Shorebird/Data_Package")
 
 ```
 
@@ -116,8 +119,8 @@ data_sitename <- "Point_ID"
 #### Temporal information
 This should indicate collection date of the first and last data point in the data package (across all files) and does not include any planning, pre- or post-processing time. The format should be one that complies with the International Standards Organization's standard 8601. The recommended format for EML is: YYYY-MM-DD, where Y is the four digit year, M is the two digit month code (01 - 12 for example, January = 01), and D is the two digit day of the month (01 - 31). Using an alternate format or setting the date to the future will cause errors down the road!
 ```{r temp_info}
-startdate <- lubridate::ymd("2010-01-26")
-enddate <- lubridate::ymd("2013-01-04")
+startdate <- lubridate::ymd("1990-02-08")
+enddate <- lubridate::ymd("2025-04-09")
 ```
 
 ## EMLassemblyline Functions
@@ -263,7 +266,7 @@ my_metadata <- EMLeditor::set_datastore_doi(my_metadata)
 
 If you already have a draft reference on DataStore that you want to upload your data package to (for instance, during peer review you noticed you needed to make some adjustments), you can add the DOI to metadata without creating a new draft reference using:
 ```{r DS_manual_doi}
-my_metadata <- EMLeditor::set_doi(my_metadata, 1234567)
+my_metadata <- EMLeditor::set_doi(my_metadata, 2315158)
 ```
 where the 1234567 number corresponds to the 7-digit DataStore reference ID.
 
@@ -286,7 +289,7 @@ my_metadata <- EMLeditor::set_language(my_metadata, "English")
 #### Add content unit links 
 These are the park units where data were collected from, for instance ROMO, not ROMN. If the data package includes data from more than one park, they can all be listed. For instance, if data were collected from all park units within a network, each unit should be listed separately rather than the network. This is because the geographic coordinates corresponding to bounding boxes for each park unit listed will automatically be generated and inserted into the metadata. Individual park units will be more informative than the bounding box for the entire network.
 ```{r content_units}
-park_units <- c("ROMO", "GRSA", "YELL")
+park_units <- c("CABR")
 my_metadata <- EMLeditor::set_content_units(my_metadata, park_units)
 ```
 
@@ -294,9 +297,9 @@ my_metadata <- EMLeditor::set_content_units(my_metadata, park_units)
 This is the unit(s) responsible for generating the data package. It may be a single park (ROMO) or a network (ROMN). It may be identical to the units listed in the previous step, overlapping, or entirely different.
 ```{r prod_units}
 # a single producing unit:
-my_metadata <- EMLeditor::set_producing_units(my_metadata, "ROMN")
+my_metadata <- EMLeditor::set_producing_units(my_metadata, "CABR")
 # alternatively, a list of producing units:
-my_metadata <- EMLeditor::set_producing_units(my_metadata, c("ROMN", "GRYN"))
+#my_metadata <- EMLeditor::set_producing_units(my_metadata, c("ROMN", "GRYN"))
 ```
 
 #### Add your data package to a DataStore project (optional)
@@ -308,7 +311,7 @@ You can add a project to your metadata. Once the metadata are extracted on DataS
 ```{r add_project}
 # where "1234567" is the DataStore Reference id for the Project
 # that the data package should be linked to.
-my_metadata <- EMLeditor::set_project(my_metadata, 1234567)
+my_metadata <- EMLeditor::set_project(my_metadata, 2315158)
 ```
 
 ## Validate your EML 
@@ -327,7 +330,7 @@ If your EML is not schema valid, the function will notify you of specific proble
 ## Write your EML to an xml file 
 Now it's time to convert your R object to an .xml file and save it. Keep in mind that the file name should end with "_metadata.xml".
 ```{r write_eml}
-EML::write_eml(my_metadata, "mymetadatafilename_metadata.xml")
+EML::write_eml(my_metadata, "Shorebird_metadata.xml")
 ```
 
 ## Check your .xml file  
@@ -360,6 +363,8 @@ If everything checked out, you should be ready to upload your data package! We r
 #upload_data_package("C:/Users/<yourusername>/Documents/my_data_package)
 
 EMLeditor::upload_data_package()
+
+
 ```
 
 From within DataStore you should be able to extract all the information from the metadata file to populate the relevant DataStore fields. In the upper right, select "Edit" from the drop down menu. Then click on the "Files and Links" tab. On the left side of the files list, select the radio button corresponding to your metadata. Then click the "Extract Metadata" button from the top right of the box with the files listed in it. 

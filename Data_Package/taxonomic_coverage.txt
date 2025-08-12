@@ -1,0 +1,63 @@
+name	name_type	name_resolved	authority_system	authority_id
+Haematopus palliatus	scientific	Haematopus palliatus	ITIS	176472
+Megaceryle alcyon	scientific	Megaceryle alcyon	ITIS	178106
+Aves	scientific	Aves	ITIS	174371
+Pluvialis squatarola	scientific	Pluvialis squatarola	ITIS	176567
+Setophaga nigrescens	scientific	Setophaga nigrescens	ITIS	950057
+Haematopus bachmani	scientific	Haematopus bachmani	ITIS	176475
+Sayornis nigricans	scientific	Sayornis nigricans	ITIS	178330
+Arenaria melanocephala	scientific	Arenaria melanocephala	ITIS	176574
+Chroicocephalus philadelphia	scientific	Chroicocephalus philadelphia	ITIS	824040
+Pelecanus occidentalis	scientific	Pelecanus occidentalis	ITIS	174685
+Larus californicus	scientific	Larus californicus	ITIS	176829
+Melozone crissalis	scientific	Melozone crissalis	ITIS	997738
+Mergus merganser	scientific	Mergus merganser	ITIS	175185
+Corvus corax	scientific	Corvus corax	ITIS	179725
+Phalacrocoracidae	scientific	Phalacrocoracidae	ITIS	174713
+Canis lupus familiaris	scientific	Canis lupus familiaris	ITIS	726821
+Nannopterum auritum	scientific	Nannopterum auritum	ITIS	1255070
+Ardeidae	scientific	Ardeidae	ITIS	174771
+Thalasseus elegans	scientific	Thalasseus elegans	ITIS	176931
+Sturnus vulgaris	scientific	Sturnus vulgaris	ITIS	179637
+Sterna forsteri	scientific	Sterna forsteri	ITIS	176887
+Ardea herodias	scientific	Ardea herodias	ITIS	174773
+Ardea alba	scientific	Ardea alba	ITIS	554135
+Podicipedidae	scientific	Podicipedidae	ITIS	174477
+Butorides virescens	scientific	Butorides virescens	ITIS	174793
+Larus heermanni	scientific	Larus heermanni	ITIS	176841
+Larus argentatus	scientific	Larus argentatus	ITIS	176824
+Laridae	scientific	Laridae	ITIS	176802
+Alcedinidae	scientific	Alcedinidae	ITIS	178104
+Calidris minutilla	scientific	Calidris minutilla	ITIS	176656
+Anas platyrhynchos	scientific	Anas platyrhynchos	ITIS	175063
+Limosa fedoa	scientific	Limosa fedoa	ITIS	176686
+Mergus	scientific	Mergus	ITIS	175184
+Larus canus	scientific	Larus canus	ITIS	176832
+Mimus polyglottos	scientific	Mimus polyglottos	ITIS	178620
+Pandion haliaetus	scientific	Pandion haliaetus	ITIS	175590
+Haematopodidae	scientific	Haematopodidae	ITIS	176467
+Urile pelagicus	scientific	Urile pelagicus	ITIS	1255065
+Pelecanidae	scientific	Pelecanidae	ITIS	174682
+Homo sapiens	scientific	Homo sapiens	ITIS	180092
+Mergus serrator	scientific	Mergus serrator	ITIS	175187
+Larus delawarensis	scientific	Larus delawarensis	ITIS	176830
+Columba livia	scientific	Columba livia	ITIS	177071
+Thalasseus maximus	scientific	Thalasseus maximus	ITIS	824142
+Arenaria interpres	scientific	Arenaria interpres	ITIS	176571
+Calidris alba	scientific	Calidris alba	ITIS	176669
+Passerculus sandwichensis	scientific	Passerculus sandwichensis	ITIS	179314
+Sayornis saya	scientific	Sayornis saya	ITIS	178333
+NA	scientific	NA	NA	NA
+Egretta thula	scientific	Egretta thula	ITIS	174813
+Melospiza melodia	scientific	Melospiza melodia	ITIS	179492
+Passerellidae	scientific	Passerellidae	ITIS	1189744
+Actitis macularius	scientific	Actitis macularius	ITIS	726049
+Calidris virgata	scientific	Calidris virgata	ITIS	1192594
+Tringa incana	scientific	Tringa incana	ITIS	176630
+Aechmophorus occidentalis	scientific	Aechmophorus occidentalis	ITIS	174503
+Larus occidentalis	scientific	Larus occidentalis	ITIS	176817
+Calidris mauri	scientific	Calidris mauri	ITIS	176668
+Numenius phaeopus	scientific	Numenius phaeopus	ITIS	176599
+Zonotrichia leucophrys	scientific	Zonotrichia leucophrys	ITIS	179455
+Tringa semipalmata	scientific	Tringa semipalmata	ITIS	824147
+Setophaga coronata	scientific	Setophaga coronata	ITIS	950046

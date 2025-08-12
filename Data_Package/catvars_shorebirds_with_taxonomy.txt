@@ -1,0 +1,56 @@
+attributeName	code	definition
+Zone	Zone I	Zone I
+Zone	Zone II	Zone II
+Zone	Zone III	Zone III
+ZoneClass	Boulders	Boulder field of Zone III
+ZoneClass	I	Zone I
+ZoneClass	II	Zone II
+ZoneClass	III	Zone III
+ZoneClass	III Boulders	Boulder field of Zone III
+ZoneClass	III Rocky Outcrop	Rocky outcrop of Zone III
+ZoneClass	Rocky Outcrop	Rocky outcrop of Zone III
+class	Aves	Aves
+class	Mammalia	Mammalia
+family	Alcedinidae	Alcedinidae
+family	Anatidae	Anatidae
+family	Ardeidae	Ardeidae
+family	Canidae	Canidae
+family	Charadriidae	Charadriidae
+family	Columbidae	Columbidae
+family	Corvidae	Corvidae
+family	Haematopodidae	Haematopodidae
+family	Hominidae	Hominidae
+family	Laridae	Laridae
+family	Mimidae	Mimidae
+family	Pandionidae	Pandionidae
+family	Parulidae	Parulidae
+family	Passerellidae	Passerellidae
+family	Pelecanidae	Pelecanidae
+family	Phalacrocoracidae	Phalacrocoracidae
+family	Podicipedidae	Podicipedidae
+family	Scolopacidae	Scolopacidae
+family	Sturnidae	Sturnidae
+family	Tyrannidae	Tyrannidae
+family	""""""	Missing Data
+identificationQualifier	uncertain identification to class	uncertain identification to class
+identificationQualifier	uncertain identification to family	uncertain identification to family
+identificationQualifier	uncertain identification to genus	uncertain identification to genus
+identificationQualifier	""""""	Missing Data
+kingdom	Animalia	Animalia
+order	Accipitriformes	Accipitriformes
+order	Anseriformes	Anseriformes
+order	Carnivora	Carnivora
+order	Charadriiformes	Charadriiformes
+order	Columbiformes	Columbiformes
+order	Coraciiformes	Coraciiformes
+order	Passeriformes	Passeriformes
+order	Pelecaniformes	Pelecaniformes
+order	Podicipediformes	Podicipediformes
+order	Primates	Primates
+order	Suliformes	Suliformes
+order	""""""	Missing Data
+taxonomicStatus	class	class
+taxonomicStatus	family	family
+taxonomicStatus	genus	genus
+taxonomicStatus	species	species
+taxonomicStatus	subspecies	subspecies

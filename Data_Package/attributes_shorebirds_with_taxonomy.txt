@@ -1,0 +1,15 @@
+attributeName	attributeDefinition	class	unit	dateTimeFormatString	missingValueCode	missingValueCodeExplanation
+DataType	Common name	character			NA	Missing Value
+SurveyDate	Survey date YYYY/mm/dd format	Date		YYYY/mm/dd	NA	Missing Value
+Year	"Year, YYYY"	numeric	number		NA	Missing Value
+Month	"Month, mm"	numeric	number		NA	Missing Value
+ZoneClass	"Zone class, includes boulders and rokcy outcrop in addition to zone 1, zone 2, zone 3"	categorical			NA	Missing Value
+Zone	"Zones 1,2,3 boulders and rocky outcrop counted as zone 3"	categorical			NA	Missing Value
+DataCount	Count for each species	numeric	number		NA	Missing Value
+scientificName	"Scientific Name, up to finest discernable taxonomy"	character			NA	Missing Value
+identificationQualifier	"Identification qualifer, gives context to what courseness taxonomic resolution is"	categorical			NA	Missing Data
+taxonomicStatus	Taxonomic courseness of identification	categorical			NA	Missing Value
+family	Family	categorical			NA	Missing Data
+order	Order	categorical			NA	Missing Data
+class	Class	categorical			NA	Missing Value
+kingdom	Kingdom	categorical			NA	Missing Value
