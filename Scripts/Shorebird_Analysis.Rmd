@@ -284,7 +284,7 @@ taropal <- c("#440154", "#fde725", "#228833", "#CCBB44", "#EE6677", "#AA3377", "
 scale_color_manual(values = taropal)
 
 # graph tags
-my_tag <- c("A) People", "B) Shorebirds")
+my_tag <- c("A) People", "B) Shoreline Birds")
 my_tag2 <- c("A) Cormorant","B) Great Blue Heron","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
 my_tag3 <- c("A) Gull","B) Pelican","C) Tern") # common taxa
 
