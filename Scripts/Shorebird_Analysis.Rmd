@@ -286,7 +286,7 @@ scale_color_manual(values = taropal)
 # graph tags
 my_tag <- c("A) People", "B) Shoreline Birds")
 my_tag2 <- c("A) Cormorant","B) Great Blue Heron","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
-my_tag3 <- c("A) Gull","B) Pelican","C) Tern") # common taxa
+my_tag3 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Herons", "F) Cormorants", "G) Land Birds") # common taxa
 
 # taxa grouped under 'common' had an average of >5 obs. for at least one year while taxa grouped under 'uncommon' had an average of <5 obs. for all years.
 ```
@@ -425,34 +425,96 @@ rm(bird_and_visitors_data, bird_and_visitors_data_byzone, birdplotfinal, birdplo
 # Taxa of Interest Plot Generation
 
 ```{r}
-# shorebirds of interest: Oystercatchers, Brown Pelicans, Cormorants, Gulls, Sandpiper, Grebe, Tern, Osprey, Heron. Lumping Gull, Tern, and Sandpiper sp. together.
+
 shorebirds_ofinterest <- shorebirds_fixed %>%
-  filter(DataType %in% c("Oystercatcher", "Great Blue Heron", "Grebe", "Osprey",
-                         "Cormorant", "Brown Pelican", "Western Gull", 
-                         "Unidentified Gull", "Ring-Billed Gull", "Mew Gull",
-                         "Juvenile Gull", "Herring Gull", "Heerman's Gull",
-                         "California Gull", "Bonaparte's Gull", "Western Sandpiper",
-                         "Spotted Sandpiper", "American Oystercatcher", 
-                         "Black Oystercatcher", "Pelican", "Tern", "Royal Tern",
-                         "Forster's Tern", "Elegant Tern")) %>%
-  mutate(DataType = case_when(
-    str_detect(DataType, "Gull") ~ "Gull",
-    str_detect(DataType, "Sandpiper") ~ "Sandpiper", 
-    str_detect(DataType, "Oystercatcher") ~ "Oystercatcher",
-    str_detect(DataType, "Tern") ~ "Tern",
-    DataType == "Brown Pelican" ~ "Pelican",
-    TRUE ~ DataType  # Keep original value for all others
+  # Filter for all species including those in your provided list
+  filter(DataType %in% c(
+    "Black-bellied Plover", "Black Oystercatcher", "American Oystercatcher", 
+    "Black Turnstone", "Ruddy Turnstone", "Wandering Tattler", "Willet", 
+    "Whimbrel", "Marbled Godwit", "Sanderling", "Least Sandpiper", 
+    "Western Sandpiper", "Spotted Sandpiper", "Surfbird", "Oystercatcher",
+    "Great Egret", "Snowy Egret", "Great Blue Heron", "Green Heron", 
+    "Heermann's Gull", "Western Gull", "California Gull", "Herring Gull", 
+    "Ring-billed Gull", "Short-billed Gull", "Mew Gull", "Bonaparte's Gull", 
+    "Unidentified Gull", "Juvenile Gull", "Common Merganser", 
+    "Red-breasted Merganser", "Mallard", "Western Grebe", "Grebe",
+    "Elegant Tern", "Royal Tern", "Forster's Tern", "Tern",
+    "Double-crested Cormorant", "Pelagic Cormorant", "Cormorant",
+    "Brown Pelican", "Pelican", "Belted Kingfisher", "Osprey", 
+    "Black Phoebe", "Say's Phoebe", "Common Raven", "Northern Mockingbird", 
+    "Song Sparrow", "Savannah Sparrow", "White-crowned Sparrow", 
+    "Yellow-rumped Warbler", "Black-throated Gray Warbler", 
+    "California Towhee", "European Starling", "Rock Dove (Pigeon)"
   )) %>%
-  group_by(DataType, Year, Zone) %>%
-  summarize(yeartotal = sum(mean_per_survey_yearly), .groups = "drop") %>%
-  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal))
+  # Assign to the 11 specific functional categories
+  mutate(Category = case_when(
+    DataType %in% c("Black-bellied Plover", "Black Oystercatcher", "American Oystercatcher", 
+                    "Black Turnstone", "Ruddy Turnstone", "Wandering Tattler", "Willet", 
+                    "Whimbrel", "Marbled Godwit", "Sanderling", "Least Sandpiper", 
+                    "Western Sandpiper", "Spotted Sandpiper", "Surfbird", "Oystercatcher", "Sandpiper") ~ "Shorebirds",
+    str_detect(DataType, "Egret") ~ "Egrets",
+    str_detect(DataType, "Heron") ~ "Herons",
+    str_detect(DataType, "Gull") ~ "Gulls",
+    DataType %in% c("Common Merganser", "Red-breasted Merganser", "Mallard", "Western Grebe", "Grebe") ~ "Waterfowl",
+    str_detect(DataType, "Tern") ~ "Terns",
+    str_detect(DataType, "Cormorant") ~ "Cormorants",
+    str_detect(DataType, "Pelican") ~ "Pelicans",
+    str_detect(DataType, "Osprey") ~ "Osprey",
+    str_detect(DataType, "Kingfisher") ~ "Kingfisher",
+    TRUE ~ "Land Birds" 
+  )) %>%
+  # Group and summarize by the new Category
+  group_by(Category, Year, Zone) %>%
+  summarize(yeartotal = sum(mean_per_survey_yearly, na.rm = TRUE), .groups = "drop") %>%
+  # Handle the 1990 data gap
+  mutate(yeartotal = if_else(Year == "1990", NA_real_, yeartotal)) %>%
+  # Define the factor levels for all 11 categories
+  mutate(Category = factor(Category, levels = c(
+    "Shorebirds", "Egrets", "Herons", "Gulls", "Waterfowl", 
+    "Terns", "Cormorants", "Pelicans", "Osprey", "Kingfisher", "Land Birds"
+  )))
+
+
+
 
 # separating by common vs uncommon taxa
 shorebirds_ofinterest_high <- shorebirds_ofinterest %>% 
-  filter(DataType %in% c("Gull","Tern","Pelican"))
+  filter(Category %in% c("Shorebirds","Gulls","Pelicans", "Terns", "Herons", "Cormorants", "Land Birds"))
+
+# scatterplot for common taxa across year by zone
+shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
+                                            aes(x=Year, y=yeartotal,      
+                                                color=Zone)) +  
+  geom_line() + 
+  geom_point() + 
+  xlab("Year") + 
+  ylab("Mean Observations per Survey") + 
+      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
+                                  max(shorebirds_ofinterest_high$Year), 
+                                  by = 5)) +  # Shows every year including 2025
+  facet_grid(Category ~ .) + 
+  scale_color_manual(values = pal) +
+  light_theme_45
+
+# Create plot with correct tags (which are labels for each species in subplot)
+shorebirds_ofinterest_scatterhigh_final <- tag_facet(shorebirds_ofinterest_scatterhigh, tag_pool = my_tag3, 
+                                                     open = "", close = "", 
+                                                     hjust = -0.2, size = 4)
+
+shorebirds_ofinterest_scatterhigh_final
+
+# Save the plot
+ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"), 
+       plot = shorebirds_ofinterest_scatterhigh_final, 
+       width = 6, 
+       height = 5)
+
+
+
+
 
 shorebirds_ofinterest_low <- shorebirds_ofinterest %>% 
-  filter(DataType %in% c("Osprey","Oystercatcher","Cormorant","Great Blue Heron","Sandpiper"))
+  filter(Category %in% c("Osprey","Oystercatcher","Cormorant","Shorebirds"))
 
 # scatterplot for uncommon taxa across year by zone
 shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,   
@@ -462,7 +524,7 @@ shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,
   geom_point() + 
   xlab("Year") + 
   ylab("Mean Observations per Survey") +
-  ggh4x::facet_grid2(DataType ~ ., scales = "free_y", independent = "y") +
+  ggh4x::facet_grid2(Category ~ ., scales = "free_y", independent = "y") +
   scale_color_manual(values = pal) +
     scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
                                   max(shorebirds_ofinterest_low$Year), 
@@ -486,33 +548,11 @@ ggsave(filename = file.path(output_dir,"shorebirds_other.png"),
        width = 6, 
        height = 5)
 
-# scatterplot for common taxa across year by zone
-shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
-                                            aes(x=Year, y=yeartotal,      
-                                                color=Zone)) +  
-  geom_line() + 
-  geom_point() + 
-  xlab("Year") + 
-  ylab("Mean Observations per Survey") + 
-      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
-                                  max(shorebirds_ofinterest_high$Year), 
-                                  by = 5)) +  # Shows every year including 2025
-  facet_grid(DataType ~ .) + 
-  scale_color_manual(values = pal) +
-  light_theme_45
 
-# Create plot with correct tags (which are labels for each species in subplot)
-shorebirds_ofinterest_scatterhigh_final <- tag_facet(shorebirds_ofinterest_scatterhigh, tag_pool = my_tag3, 
-                                                     open = "", close = "", 
-                                                     hjust = -0.2, size = 4)
 
-shorebirds_ofinterest_scatterhigh_final
 
-# Save the plot
-ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"), 
-       plot = shorebirds_ofinterest_scatterhigh_final, 
-       width = 6, 
-       height = 5)
+
+
 
 # Remove intermediary datasets
 rm(shorebirds_ofinterest_high, shorebirds_ofinterest_low, shorebirds_ofinterest_scatter, shorebirds_ofinterest_scatterlow, shorebirds_ofinterest_scatterhigh)
