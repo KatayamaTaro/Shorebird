@@ -143,114 +143,6 @@ shorebirds_fixed <- shorebirds_processed %>%
 rm(shorebirds_surveymeans)
 ```
 
-# Summary statistics
-
-```{r}
-# for Appendix
-
-#Yearly Survey Count
-surveycounts <- shorebirds_fixed %>% 
-  group_by(Year) %>% 
-  mutate(surveynumber_yearly = n_distinct(SurveyDate)) %>% 
-  summarize(surveytotal=surveynumber_yearly) %>% 
-  distinct(Year, surveytotal, .keep_all = TRUE)
-
-#Bird count sum by year
-bird_counts <- shorebirds_fixed %>%
-  group_by(DataType, Year) %>% 
-  mutate(DataType = case_when(
-    DataType == 'People' ~ 'People',
-    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
-    TRUE ~ 'Birds')) %>% 
-  filter(DataType != "Dogs On Leash",
-         DataType != "People") %>%
-  ungroup() %>% 
-  group_by(Year) %>% 
-  summarize(birdtotal = sum(DataCount))
-
-#People count sum by year (including dogs)
-people_counts <- shorebirds_fixed %>%
-  group_by(DataType, Year) %>% 
-  mutate(DataType = case_when(
-    DataType == 'People' ~ 'People',
-    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
-    TRUE ~ 'Birds')) %>% 
-  filter(DataType != "Birds") %>%
-  ungroup() %>% 
-  group_by(Year) %>% 
-  summarize(peopletotal = sum(DataCount))
-
-#People count by zone
-people_counts_byzone <- shorebirds_fixed %>%
-  group_by(DataType, Zone) %>% 
-  mutate(DataType = case_when(
-    DataType == 'People' ~ 'People',
-    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
-    TRUE ~ 'Birds')) %>% 
-  filter(DataType != "Birds") %>%
-  ungroup() %>% 
-  group_by(Zone) %>% 
-  summarize(peopletotal = sum(DataCount))
-
-#bird Count by zone
-bird_counts_byzone <- shorebirds_fixed %>%
-  group_by(DataType, Zone) %>% 
-  mutate(DataType = case_when(
-    DataType == 'People' ~ 'People',
-    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
-    TRUE ~ 'Birds')) %>% 
-  filter(DataType != "People",
-         DataType != "Dogs On Leash") %>%
-  ungroup() %>% 
-  group_by(Zone) %>% 
-  summarize(birdtotal = sum(DataCount))
-
-#average count of birds and people by year
-average_counts <- surveycounts %>%
-  dplyr::right_join(bird_counts) %>%
-  dplyr::right_join(people_counts) %>%
-  group_by(Year, surveytotal) %>% 
-  summarize(average_birds = (birdtotal/surveytotal),
-            average_people = (peopletotal/surveytotal))
-
-#Save average count of birds and people by year to plots folder
-write_xlsx(average_counts, file.path(output_dir,"survey_count.xlsx"))
-
-#exploratory analysis of survey number through years
-plot <- ggplot(surveycounts, aes(x = Year, y = surveytotal)) +
-  # Add points for individual data points
-  geom_point(alpha = 0.6, size = 2, color = "steelblue") +
-  # Add a smooth line connecting the points
-  geom_line(alpha = 0.7, color = "steelblue") +
-  # Add horizontal line for overall mean
-  geom_hline(aes(yintercept = mean(surveytotal, na.rm = TRUE)), 
-             color = "red", linetype = "dashed", size = 1) +
-  # Add labels and title
-  labs(
-    title = "Survey Total by Year",
-    subtitle = "Red dashed line shows overall mean survey total",
-    x = "Year",
-    y = "Survey Total",
-    caption = "Data source: surveycount dataset"
-  ) +
-  # Apply a clean theme
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 14, face = "bold"),
-    plot.subtitle = element_text(size = 12, color = "gray60"),
-    axis.title = element_text(size = 12),
-    axis.text = element_text(size = 10)
-  ) +
-  # Format x-axis to show years clearly
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))
-
-# Display the plot
-print(plot)
-
-#Remove intermediary datasets
-rm(surveycounts, bird_counts, people_counts, plot)
-```
-
 # Base Themes + Other Plot Details
 
 ```{r}
@@ -285,8 +177,7 @@ scale_color_manual(values = taropal)
 
 # graph tags
 my_tag <- c("A) People", "B) Shoreline Birds")
-my_tag2 <- c("A) Cormorant","B) Great Blue Heron","D) Osprey","E) Oystercatcher","F) Sandpiper") # uncommon taxa
-my_tag3 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Herons", "F) Cormorants", "G) Land Birds") # common taxa
+
 
 # taxa grouped under 'common' had an average of >5 obs. for at least one year while taxa grouped under 'uncommon' had an average of <5 obs. for all years.
 ```
@@ -422,11 +313,10 @@ write_xlsx(trend_results, file.path(output_dir, "trend_results.xlsx"))
 rm(bird_and_visitors_data, bird_and_visitors_data_byzone, birdplotfinal, birdplot, birdplot_byzone, model, model_summary, subset_data)
 ```
 
-# Taxa of Interest Plot Generation
+# Shoreline Bird Categorization
 
 ```{r}
-
-shorebirds_ofinterest <- shorebirds_fixed %>%
+shorelinebird_categories <- shorebirds_fixed %>%
   # Filter for all species including those in your provided list
   filter(DataType %in% c(
     "Black-bellied Plover", "Black Oystercatcher", "American Oystercatcher", 
@@ -473,16 +363,91 @@ shorebirds_ofinterest <- shorebirds_fixed %>%
     "Shorebirds", "Egrets", "Herons", "Gulls", "Waterfowl", 
     "Terns", "Cormorants", "Pelicans", "Osprey", "Kingfisher", "Land Birds"
   )))
+```
 
 
+# Species Observation/Year Analysis Heatmap 2 Options!
 
+```{r}
+cb_palette <- c("white", "#fde725", "#35b779", "#31688e", "#440154")
 
-# separating by common vs uncommon taxa
-shorebirds_ofinterest_high <- shorebirds_ofinterest %>% 
-  filter(Category %in% c("Shorebirds","Gulls","Pelicans", "Terns", "Herons", "Cormorants", "Land Birds"))
+shoreline_birds_heatmap <- ggplot(shoreline_birds, aes(x = Year, y = Category, fill = yeartotal)) +
+  geom_tile(color = "white") +
+  # text color adjustments
+  geom_text(aes(label = round(yeartotal, 1), 
+                color = yeartotal > 5),
+            size = 3) + 
+  scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), 
+                     guide = "none") +
+scale_fill_gradientn(
+  colors = cb_palette, 
+  trans = "log1p", 
+  na.value = "white",
+  # 1. Define specific tick locations
+  breaks = c(0, 1, 2, 5, 10, 20, 50, 100), 
+  
+  guide = guide_colorbar(
+    barheight = unit(10, "cm"),
+    # 2. nbin makes the color ramp smoother with more "steps"
+    nbin = 100, 
+    # 3. draw.ulim and draw.llim ensure the top/bottom ticks show up
+    draw.ulim = TRUE, 
+    draw.llim = TRUE
+  )
+) +
+  facet_wrap(~ Zone, ncol = 1) + 
+  light_theme_45 +
+  labs(title = "Bird Observations by Zone", x = "Year", y = "Category")
+
+shoreline_birds_heatmap
+
+shoreline_birds_heatmap_2 <- ggplot(shoreline_birds, aes(x = Year, y = Zone, fill = yeartotal)) +
+  geom_tile(color = "white") +
+# text color adjustments
+  geom_text(aes(label = round(yeartotal, 1), 
+                color = yeartotal > 5),
+            size = 3) + 
+  scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), 
+                     guide = "none") +
+ scale_fill_gradientn(
+  colors = cb_palette, 
+  trans = "log1p", 
+  na.value = "white",
+  # 1. Define specific tick locations
+  breaks = c(0, 1, 2, 5, 10, 20, 50, 100), 
+  
+  guide = guide_colorbar(
+    barheight = unit(10, "cm"),
+    # 2. nbin makes the color ramp smoother with more "steps"
+    nbin = 100, 
+    # 3. draw.ulim and draw.llim ensure the top/bottom ticks show up
+    draw.ulim = TRUE, 
+    draw.llim = TRUE
+  )
+) +
+  scale_y_discrete(limits = rev)+
+  facet_wrap(~ Category, ncol = 1) +  # Stacks the three zones vertically
+  light_theme_45 +
+  labs(title = "Shoreline Bird Observations Faceted by Category", x = "Year", y = "Category")
+
+shoreline_birds_heatmap_2
+```
+
+# Analysis
+
+```{r}
+my_tag2 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Cormorants", "F) Egrets", "G) Osprey", "H) Kingfisher", "I) Waterfowl", "J) Herons", "K) Land Birds") # common taxa
+
+# Define the order of categories explicitly
+category_order <- c("Shorebirds", "Gulls", "Pelicans", "Terns", "Cormorants", "Egrets", "Osprey", "Kingfisher", "Waterfowl", "Herons", "Land Birds")
+
+# Reorder the Factor in your dataframe
+shoreline_birds <- shorelinebird_categories %>%
+  mutate(Category = factor(Category, levels = category_order))
+
 
 # scatterplot for common taxa across year by zone
-shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
+shoreline_birds_category_abundance <- ggplot(shoreline_birds,
                                             aes(x=Year, y=yeartotal,      
                                                 color=Zone)) +  
   geom_line() + 
@@ -492,64 +457,47 @@ shorebirds_ofinterest_scatterhigh <- ggplot(shorebirds_ofinterest_high,
       scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
                                   max(shorebirds_ofinterest_high$Year), 
                                   by = 5)) +  # Shows every year including 2025
-  facet_grid(Category ~ .) + 
+  facet_wrap(~ Category, ncol = 3) + 
   scale_color_manual(values = pal) +
   light_theme_45
 
 # Create plot with correct tags (which are labels for each species in subplot)
-shorebirds_ofinterest_scatterhigh_final <- tag_facet(shorebirds_ofinterest_scatterhigh, tag_pool = my_tag3, 
+shoreline_birds_category_plot <- tag_facet(shoreline_birds_category_abundance, tag_pool = my_tag2, 
                                                      open = "", close = "", 
                                                      hjust = -0.2, size = 4)
 
-shorebirds_ofinterest_scatterhigh_final
+print(shoreline_birds_category_plot)
 
 # Save the plot
 ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"), 
        plot = shorebirds_ofinterest_scatterhigh_final, 
-       width = 6, 
+       width = 6.5, 
        height = 5)
 
 
 
 
-
-shorebirds_ofinterest_low <- shorebirds_ofinterest %>% 
-  filter(Category %in% c("Osprey","Oystercatcher","Cormorant","Shorebirds"))
-
-# scatterplot for uncommon taxa across year by zone
-shorebirds_ofinterest_scatterlow <- ggplot(shorebirds_ofinterest_low,   
-                                           aes(x=Year, y=yeartotal, 
-                                               color=Zone)) +  
+# scatterplot for shoreline bird categories (Free the Y)
+shoreline_birds_category_Free_Y <- ggplot(shoreline_birds,
+                                            aes(x=Year, y=yeartotal,      
+                                                color=Zone)) +  
   geom_line() + 
   geom_point() + 
   xlab("Year") + 
-  ylab("Mean Observations per Survey") +
-  ggh4x::facet_grid2(Category ~ ., scales = "free_y", independent = "y") +
+  ylab("Mean Observations per Survey") + 
+      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
+                                  max(shorebirds_ofinterest_high$Year), 
+                                  by = 5)) +  # Shows every year including 2025
+  facet_wrap(~ Category, ncol = 3, scales = "free_y") + 
   scale_color_manual(values = pal) +
-    scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
-                                  max(shorebirds_ofinterest_low$Year), 
-                                  by = 5)) +
-  light_theme_45 +
-  theme(strip.text = element_blank(),
-        axis.title.x = element_text(vjust = -0.5),
-        axis.title.y = element_text(vjust = +2.4),
-        axis.text.y = element_text(size = 12))
+  light_theme_45
 
 # Create plot with correct tags (which are labels for each species in subplot)
-shorebirds_ofinterest_scatterlow_final <- tag_facet(shorebirds_ofinterest_scatterlow, tag_pool = my_tag2, 
-                                                    open = "", close = "",
-                                                    hjust = -0.2, size = 4)
+shoreline_birds_category_Free_Y_plot <- tag_facet(shoreline_birds_category_Free_Y, tag_pool = my_tag2, 
+                                                     open = "", close = "", 
+                                                     hjust = -0.2, size = 4)
 
-shorebirds_ofinterest_scatterlow_final
-
-# Save the plot
-ggsave(filename = file.path(output_dir,"shorebirds_other.png"), 
-       plot = shorebirds_ofinterest_scatterlow_final, 
-       width = 6, 
-       height = 5)
-
-
-
+print(shoreline_birds_category_Free_Y_plot)
 
 
 
@@ -557,6 +505,7 @@ ggsave(filename = file.path(output_dir,"shorebirds_other.png"),
 # Remove intermediary datasets
 rm(shorebirds_ofinterest_high, shorebirds_ofinterest_low, shorebirds_ofinterest_scatter, shorebirds_ofinterest_scatterlow, shorebirds_ofinterest_scatterhigh)
 ```
+
 
 # Stacked Bar Chart
 
@@ -636,4 +585,112 @@ ggsave(filename = file.path(output_dir,"shorebird_stacked_prop.png"),
        height = 5)
 
 rm(shorebirds_stack)
+```
+
+# Summary statistics
+
+```{r}
+# for Appendix
+
+#Yearly Survey Count
+surveycounts <- shorebirds_fixed %>% 
+  group_by(Year) %>% 
+  mutate(surveynumber_yearly = n_distinct(SurveyDate)) %>% 
+  distinct(Year, surveynumber_yearly, .keep_all = TRUE)%>%
+  select(Year, surveynumber_yearly)
+
+#Bird count sum by year
+bird_counts <- shorebirds_fixed %>%
+  group_by(DataType, Year) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Dogs On Leash",
+         DataType != "People") %>%
+  ungroup() %>% 
+  group_by(Year) %>% 
+  summarize(birdtotal = sum(DataCount))
+
+#People count sum by year (including dogs)
+people_counts <- shorebirds_fixed %>%
+  group_by(DataType, Year) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Birds") %>%
+  ungroup() %>% 
+  group_by(Year) %>% 
+  summarize(peopletotal = sum(DataCount))
+
+#People count by zone
+people_counts_byzone <- shorebirds_fixed %>%
+  group_by(DataType, Zone) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "Birds") %>%
+  ungroup() %>% 
+  group_by(Zone) %>% 
+  summarize(peopletotal = sum(DataCount))
+
+#bird Count by zone
+bird_counts_byzone <- shorebirds_fixed %>%
+  group_by(DataType, Zone) %>% 
+  mutate(DataType = case_when(
+    DataType == 'People' ~ 'People',
+    DataType == 'Dogs On Leash' ~ 'Dogs On Leash',
+    TRUE ~ 'Birds')) %>% 
+  filter(DataType != "People",
+         DataType != "Dogs On Leash") %>%
+  ungroup() %>% 
+  group_by(Zone) %>% 
+  summarize(birdtotal = sum(DataCount))
+
+#average count of birds and people by year
+average_counts <- surveycounts %>%
+  dplyr::right_join(bird_counts) %>%
+  dplyr::right_join(people_counts) %>%
+  group_by(Year, surveynumber_yearly)%>% 
+  summarize(average_birds = (birdtotal/surveynumber_yearly),
+            average_people = (peopletotal/surveynumber_yearly))
+
+#Save average count of birds and people by year to plots folder
+write_xlsx(average_counts, file.path(output_dir,"survey_count.xlsx"))
+
+#exploratory analysis of survey number through years
+plot <- ggplot(surveycounts, aes(x = Year, y = surveynumber_yearly)) +
+  # Add points for individual data points
+  geom_point(alpha = 0.6, size = 2, color = "steelblue") +
+  # Add a smooth line connecting the points
+  geom_line(alpha = 0.7, color = "steelblue") +
+  # Add horizontal line for overall mean
+  geom_hline(aes(yintercept = mean(surveynumber_yearly, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", size = 1) +
+  # Add labels and title
+  labs(
+    title = "Survey Total by Year",
+    subtitle = "Red dashed line shows overall mean survey total",
+    x = "Year",
+    y = "Survey Total",
+    caption = "Data source: surveycount dataset"
+  ) +
+  # Apply a clean theme
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12, color = "gray60"),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10)
+  ) +
+  # Format x-axis to show years clearly
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))
+
+# Display the plot
+print(plot)
+
+#Remove intermediary datasets
+rm(surveycounts, bird_counts, people_counts, plot)
 ```
