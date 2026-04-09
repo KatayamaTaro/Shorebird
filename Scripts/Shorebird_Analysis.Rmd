@@ -24,7 +24,8 @@ library(ggh4x) # for free y-axis
 library(RColorBrewer)
 #install.packages("writexl")
 library(writexl)
-
+#install.packages("scales")
+library(scales)
 #get working directory, should be set to root Shorebirds folder!
 getwd()
 
@@ -169,8 +170,19 @@ light_theme_45 <- theme_bw() + base_theme_45
 pal <- pnw_palette(name="Sunset2",n=3,type="discrete")
 pal2 <- pnw_palette(name="Sunset2",n=2,type="discrete")
 pal3 <- pnw_palette(name="Sailboat",n=6,type="discrete")
-taropal <- c("#440154", "#fde725", "#228833", "#CCBB44", "#EE6677", "#AA3377", "#BBBBBB", "#99DDFF", "#44BB99")
-
+taropal <- c(
+  "#440154", # Dark Purple
+  "#fde725", # Bright Yellow
+  "#228833", # Green
+  "#CCBB44", # Muted Yellow/Gold
+  "#EE6677", # Rose/Pink
+  "#AA3377", # Magenta
+  "#BBBBBB", # Grey
+  "#99DDFF", # Light Blue
+  "#44BB99", # Teal/Mint
+  "#E69F00", # Burnt Orange (New)
+  "#0077BB"  # Deep Blue (New)
+)
 
 # Usage in ggplot scale_fill_manual(values = pal9) 
 scale_color_manual(values = taropal)
@@ -371,12 +383,37 @@ shorelinebird_categories <- shorebirds_fixed %>%
 ```{r}
 cb_palette <- c("white", "#fde725", "#35b779", "#31688e", "#440154")
 
+# Adjusted base theme for dense heatmaps
+base_theme_45 <- theme(
+  text = element_text(size = 11), 
+  
+  # Increase vertical space between bird categories
+  panel.spacing.y = unit(0.3, 'lines'), 
+  
+  # Clean up strips (the bird names)
+  strip.background = element_blank(),
+  strip.text = element_text(size = 9, face = "bold", hjust = 0),
+  strip.placement = 'outside',
+  
+  panel.grid = element_blank(),
+  
+  # Shrink axis labels so "Zone I/II/III" don't touch
+  axis.text.y = element_text(size = 7), 
+  axis.text.x = element_text(size = 7, angle = 45, hjust = 1),
+  
+  # Legend adjustments
+  legend.text = element_text(size = 7),
+  legend.title = element_text(size = 7)
+)
+
+light_theme_45 <- theme_bw() + base_theme_45
+
 shoreline_birds_heatmap <- ggplot(shoreline_birds, aes(x = Year, y = Category, fill = yeartotal)) +
   geom_tile(color = "white") +
   # text color adjustments
   geom_text(aes(label = round(yeartotal, 1), 
                 color = yeartotal > 5),
-            size = 3) + 
+            size = 1.4) + 
   scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), 
                      guide = "none") +
 scale_fill_gradientn(
@@ -388,6 +425,7 @@ scale_fill_gradientn(
   
   guide = guide_colorbar(
     barheight = unit(10, "cm"),
+    barwidth = unit(0.3, "cm"),
     # 2. nbin makes the color ramp smoother with more "steps"
     nbin = 100, 
     # 3. draw.ulim and draw.llim ensure the top/bottom ticks show up
@@ -397,16 +435,24 @@ scale_fill_gradientn(
 ) +
   facet_wrap(~ Zone, ncol = 1) + 
   light_theme_45 +
-  labs(title = "Bird Observations by Zone", x = "Year", y = "Category")
+  labs(x = "Year", y = "Bird Category")
 
 shoreline_birds_heatmap
+
+ggsave(filename = file.path(output_dir,"Shoreline_Bird_Observations_Zones.png"), 
+       plot = shoreline_birds_heatmap,
+       width = 7, 
+       height = 9.0, 
+       units = "in", 
+       dpi = 300)
+
 
 shoreline_birds_heatmap_2 <- ggplot(shoreline_birds, aes(x = Year, y = Zone, fill = yeartotal)) +
   geom_tile(color = "white") +
 # text color adjustments
   geom_text(aes(label = round(yeartotal, 1), 
                 color = yeartotal > 5),
-            size = 3) + 
+            size = 1.5) + 
   scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), 
                      guide = "none") +
  scale_fill_gradientn(
@@ -417,7 +463,8 @@ shoreline_birds_heatmap_2 <- ggplot(shoreline_birds, aes(x = Year, y = Zone, fil
   breaks = c(0, 1, 2, 5, 10, 20, 50, 100), 
   
   guide = guide_colorbar(
-    barheight = unit(10, "cm"),
+    barheight = unit(6, "cm"),
+    barwidth = unit(0.2, "cm"),
     # 2. nbin makes the color ramp smoother with more "steps"
     nbin = 100, 
     # 3. draw.ulim and draw.llim ensure the top/bottom ticks show up
@@ -425,82 +472,66 @@ shoreline_birds_heatmap_2 <- ggplot(shoreline_birds, aes(x = Year, y = Zone, fil
     draw.llim = TRUE
   )
 ) +
-  scale_y_discrete(limits = rev)+
+  scale_y_discrete(limits = rev, expand = expansion(mult = c(0.5, 0.5)))+
   facet_wrap(~ Category, ncol = 1) +  # Stacks the three zones vertically
   light_theme_45 +
   labs(title = "Shoreline Bird Observations Faceted by Category", x = "Year", y = "Category")
 
 shoreline_birds_heatmap_2
+
+ggsave(filename = file.path(output_dir,"Shoreline_Bird_Observations_Categories.png"), 
+       plot = shoreline_birds_heatmap_2,
+       width = 7, 
+       height = 9.0, 
+       units = "in", 
+       dpi = 300)
 ```
 
 # Analysis
 
+
 ```{r}
-my_tag2 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Cormorants", "F) Egrets", "G) Osprey", "H) Kingfisher", "I) Waterfowl", "J) Herons", "K) Land Birds") # common taxa
+
+my_tag3 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Cormorants", "F) Egrets", "G) Herons", "H) Land Birds") # common taxa
 
 # Define the order of categories explicitly
-category_order <- c("Shorebirds", "Gulls", "Pelicans", "Terns", "Cormorants", "Egrets", "Osprey", "Kingfisher", "Waterfowl", "Herons", "Land Birds")
+category_order2 <- c("Shorebirds", "Gulls", "Pelicans", "Terns", "Cormorants", "Egrets", "Herons", "Land Birds")
 
 # Reorder the Factor in your dataframe
-shoreline_birds <- shorelinebird_categories %>%
-  mutate(Category = factor(Category, levels = category_order))
-
-
-# scatterplot for common taxa across year by zone
-shoreline_birds_category_abundance <- ggplot(shoreline_birds,
-                                            aes(x=Year, y=yeartotal,      
-                                                color=Zone)) +  
-  geom_line() + 
-  geom_point() + 
-  xlab("Year") + 
-  ylab("Mean Observations per Survey") + 
-      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
-                                  max(shorebirds_ofinterest_high$Year), 
-                                  by = 5)) +  # Shows every year including 2025
-  facet_wrap(~ Category, ncol = 3) + 
-  scale_color_manual(values = pal) +
-  light_theme_45
-
-# Create plot with correct tags (which are labels for each species in subplot)
-shoreline_birds_category_plot <- tag_facet(shoreline_birds_category_abundance, tag_pool = my_tag2, 
-                                                     open = "", close = "", 
-                                                     hjust = -0.2, size = 4)
-
-print(shoreline_birds_category_plot)
-
-# Save the plot
-ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"), 
-       plot = shorebirds_ofinterest_scatterhigh_final, 
-       width = 6.5, 
-       height = 5)
-
-
-
+shoreline_birds2 <- shorelinebird_categories %>%
+  filter(Category %in% category_order2) %>%
+  mutate(Category = factor(Category, levels = category_order2))
 
 # scatterplot for shoreline bird categories (Free the Y)
-shoreline_birds_category_Free_Y <- ggplot(shoreline_birds,
+shoreline_birds_category_Free_Y <- ggplot(shoreline_birds2,
                                             aes(x=Year, y=yeartotal,      
                                                 color=Zone)) +  
-  geom_line() + 
-  geom_point() + 
+  geom_line(linewidth = 0.4) + 
+  geom_point(size = 0.8) + 
   xlab("Year") + 
   ylab("Mean Observations per Survey") + 
+  scale_y_continuous(
+  n.breaks = 6, # Suggesting 6 usually results in 5 visible ticks
+  expand = expansion(mult = c(0, 0.15))) + 
       scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
                                   max(shorebirds_ofinterest_high$Year), 
                                   by = 5)) +  # Shows every year including 2025
-  facet_wrap(~ Category, ncol = 3, scales = "free_y") + 
+  facet_wrap(~ Category, ncol = 2, scales = "free_y") + 
   scale_color_manual(values = pal) +
   light_theme_45
 
 # Create plot with correct tags (which are labels for each species in subplot)
-shoreline_birds_category_Free_Y_plot <- tag_facet(shoreline_birds_category_Free_Y, tag_pool = my_tag2, 
+shoreline_birds_category_Free_Y_plot <- tag_facet(shoreline_birds_category_Free_Y, tag_pool = my_tag3, 
                                                      open = "", close = "", 
-                                                     hjust = -0.2, size = 4)
+                                                     hjust = -0.2, size = 2.5)
 
 print(shoreline_birds_category_Free_Y_plot)
 
-
-
+# Save the plot
+ggsave(filename = file.path(output_dir,"BirdsOfInterestFreeY.png"), 
+       plot = shoreline_birds_category_Free_Y_plot, 
+       width = 6.5, 
+       height = 6)
 
 # Remove intermediary datasets
 rm(shorebirds_ofinterest_high, shorebirds_ofinterest_low, shorebirds_ofinterest_scatter, shorebirds_ofinterest_scatterlow, shorebirds_ofinterest_scatterhigh)
@@ -510,48 +541,22 @@ rm(shorebirds_ofinterest_high, shorebirds_ofinterest_low, shorebirds_ofinterest_
 # Stacked Bar Chart
 
 ```{r}
-# Shorebird groups
-shorebirds_stack <- shorebirds_fixed %>%
-  filter(!DataType %in% c("Dogs On Leash", "People")) %>%
-  mutate(DataType = case_when(
-    str_detect(DataType, "Gull") ~ "Gull",
-    str_detect(DataType, "Sandpiper") ~ "Sandpiper", 
-    str_detect(DataType, "Oystercatcher") ~ "Oystercatcher",
-    str_detect(DataType, "Tern") ~ "Tern",
-    DataType == "Brown Pelican" ~ "Pelican",
-    DataType %in% c("Pelican", "Cormorant", "Great Blue Heron", 
-                   "Osprey", "Grebe") ~ DataType,
-    TRUE ~ "Others"
-  )) %>%
-  group_by(DataType, Year) %>%
-  summarize(yeartotal = sum(mean_per_survey_yearly), .groups = "drop") %>%
-  mutate(yeartotal = if_else(Year == "1990", NA, yeartotal)) %>%
-  na.omit() %>%
-  group_by(Year) %>%
-  mutate(yearlymean_total = sum(yeartotal),
-         proportion = yeartotal / yearlymean_total)
 
-# Create the factor with levels (Grebe removed)
-shorebirds_stack$DataType <- factor(shorebirds_stack$DataType,
-                                    levels=c('Cormorant', 
-                                             'Great Blue Heron', 
-                                             'Gull', 
-                                             'Osprey', 
-                                             'Oystercatcher', 
-                                             'Pelican', 
-                                             'Sandpiper', 
-                                             'Tern', 
-                                             'Others'))
+shoreline_bird_yearly_sum<- shorelinebird_categories%>%
+  group_by(Category, Year)%>%
+  mutate(sumyear= sum(yeartotal))%>%
+  select(Category, Year, sumyear)%>%
+  distinct(Category, Year, .keep_all = TRUE)
 
 #Shorebird stacked plot
-shorebirds_stackedplot <- ggplot(shorebirds_stack, 
-                                 aes(x = Year, y = yeartotal, fill = DataType)) +
+shorebirds_stackedplot <- ggplot(shoreline_bird_yearly_sum, 
+                                 aes(x = Year, y = sumyear, fill = Category)) +
   geom_bar(stat = "identity") + 
   ylab("Mean Observations per Survey") + 
-  labs(fill = "Taxa") +
   scale_fill_manual(values = taropal) +
+  labs(fill = "Taxa") +
   scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
-                                  max(shorebirds_stack$Year), 
+                                  max(shoreline_bird_yearly_sum$Year), 
                                   by = 5)) +
   light_theme_45 + 
   theme(axis.title.y = element_text(vjust = +2.4))
@@ -563,31 +568,9 @@ ggsave(filename = file.path(output_dir,"shorebird.png"),
        plot = shorebirds_stackedplot, 
        width = 6, 
        height = 5)
-
-# extra visual 
-shorebirds_stackedprop <- ggplot(shorebirds_stack, aes(x=Year, y=proportion, fill=DataType)) +
-  geom_bar(stat = "identity") + 
-  ylab("Proportion") + 
-  labs(fill = "Taxa") +
-  scale_fill_manual(values = taropal) +
-  scale_x_continuous(breaks = seq(min(shorebirds_stack$Year), 
-                                  max(shorebirds_stack$Year), 
-                                  by = 5)) +  # Shows every year including 2025
-  light_theme_45 + 
-  theme(axis.title.y = element_text(vjust = +2.4))
-
-shorebirds_stackedprop
-
-# Save the plot
-ggsave(filename = file.path(output_dir,"shorebird_stacked_prop.png"), 
-       plot = shorebirds_stackedprop, 
-       width = 6, 
-       height = 5)
-
-rm(shorebirds_stack)
 ```
 
-# Summary statistics
+# Summary statistics and Appendix
 
 ```{r}
 # for Appendix
@@ -693,4 +676,42 @@ print(plot)
 
 #Remove intermediary datasets
 rm(surveycounts, bird_counts, people_counts, plot)
+
+my_tag2 <- c("A) Shorebirds","B) Gulls","C) Pelicans", "D) Terns", "E) Cormorants", "F) Egrets", "G) Osprey", "H) Kingfisher", "I) Waterfowl", "J) Herons", "K) Land Birds") # common taxa
+
+# Define the order of categories explicitly
+category_order <- c("Shorebirds", "Gulls", "Pelicans", "Terns", "Cormorants", "Egrets", "Osprey", "Kingfisher", "Waterfowl", "Herons", "Land Birds")
+
+# Reorder the Factor in your dataframe
+shoreline_birds <- shorelinebird_categories %>%
+  mutate(Category = factor(Category, levels = category_order))
+
+
+# scatterplot for common taxa across year by zone
+shoreline_birds_category_abundance <- ggplot(shoreline_birds2,
+                                            aes(x=Year, y=yeartotal,      
+                                                color=Zone)) +  
+  geom_line() + 
+  geom_point() + 
+  xlab("Year") + 
+  ylab("Mean Observations per Survey") + 
+      scale_x_continuous(breaks = seq(1990,  # Start breaks at 1990
+                                  max(shorebirds_ofinterest_high$Year), 
+                                  by = 5)) +  # Shows every year including 2025
+  facet_wrap(~ Category, ncol = 2) + 
+  scale_color_manual(values = pal) +
+  light_theme_45
+
+# Create plot with correct tags (which are labels for each species in subplot)
+shoreline_birds_category_plot <- tag_facet(shoreline_birds_category_abundance, tag_pool = my_tag3, 
+                                                     open = "", close = "", 
+                                                     hjust = -0.2, size = 4)
+
+print(shoreline_birds_category_plot)
+
+# Save the plot
+ggsave(filename = file.path(output_dir,"BirdsOfInterest.png"), 
+       plot = shoreline_birds_category_plot, 
+       width = 6.5, 
+       height = 5)
 ```
