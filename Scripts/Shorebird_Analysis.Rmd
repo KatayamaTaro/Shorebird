@@ -408,7 +408,7 @@ base_theme_45 <- theme(
 
 light_theme_45 <- theme_bw() + base_theme_45
 
-shoreline_birds_heatmap <- ggplot(shoreline_birds, aes(x = Year, y = Category, fill = yeartotal)) +
+shoreline_birds_heatmap <- ggplot(shorelinebird_categories, aes(x = Year, y = Category, fill = yeartotal)) +
   geom_tile(color = "white") +
   # text color adjustments
   geom_text(aes(label = round(yeartotal, 1), 
@@ -447,7 +447,7 @@ ggsave(filename = file.path(output_dir,"Shoreline_Bird_Observations_Zones.png"),
        dpi = 300)
 
 
-shoreline_birds_heatmap_2 <- ggplot(shoreline_birds, aes(x = Year, y = Zone, fill = yeartotal)) +
+shoreline_birds_heatmap_2 <- ggplot(shorelinebird_categories, aes(x = Year, y = Zone, fill = yeartotal)) +
   geom_tile(color = "white") +
 # text color adjustments
   geom_text(aes(label = round(yeartotal, 1), 
