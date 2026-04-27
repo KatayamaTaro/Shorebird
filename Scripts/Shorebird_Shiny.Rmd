@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(shiny)
 
-# Define UI
+# --- UI Definition ---
 ui <- fluidPage(
   titlePanel("Shorebird Data Entry"),
   
@@ -25,118 +25,133 @@ ui <- fluidPage(
                   choices = c("Select Zone", "I", "II", "III", "III Boulders", "III Rocky Outcrop")),
       
       selectInput("dataType", "Species:",
-                  choices = c("Select Species", "Great Blue Heron", "Great Egret", "Snowy Egret", "People", "Dogs on Leash", "Brown Pelican", "Cormorant", "Black-Bellied Plover", "Willet", "Wandering Tattler", "Spotted Sandpiper", "Marbled Godwit", "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")),
+                  choices = c("Select Species", "People","Dogs on Leash", "Brown Pelican", "Cormorant","Great Blue Heron", "Great                               Egret", "Snowy Egret","Black-Bellied Plover", "Curlew",
+                              "Willet", "Wandering Tattler", "Oystercatcher", "Spotted Sandpiper", "Marbled Godwit", 
+                              "Whimbrel", "Ruddy Turnstone", "Black Turnstone", "Surfbird", 
+                              "Sanderling", "Juvenile Gull", "Western Gull", "California Gull", 
+                              "Heerman's Gull", "Herring Gull", "Tern", "Unidentified Gull", 
+                              "Unidentified Bird (non-gull)", "Black Phoebe", "Say's Phoebe")),
       
       numericInput("dataCount", "Data Count:", value = 1, min = 1),
       
-      actionButton("submit", "Submit"),
-      actionButton("removeLast", "Remove Last Entry"),
-      downloadButton("downloadData", "Download CSV")
+      actionButton("submit", "Submit Entry", class = "btn-primary"),
+      actionButton("removeLast", "Remove Last Session Entry"),
+      hr(),
+      downloadButton("downloadData", "Download CSV (Session Data)")
     ),
     
     mainPanel(
-      textOutput("status"),
-      h4("Last 5 Entries:"),
-      tableOutput("recentDataTable"),  # Display the most recent 5 entries
+      wellPanel(
+        span("Status: ", style = "font-weight: bold;"),
+        textOutput("status", inline = TRUE)
+      ),
+      h4("Last 5 Entries (From CSV File):"),
+      tableOutput("fileDataTable"),  # Shows data saved in the actual file
       hr(),
-      h4("All Recorded Data:"),
-      tableOutput("dataTable")  # Display all submitted data
+      h4("Current Session History:"),
+      tableOutput("dataTable")      # Shows everything entered since opening the app
     )
   )
 )
 
-# Define server logic
+# --- Server Logic ---
 server <- function(input, output, session) {
   
-  # Reactive value to store data
-  data <- reactiveVal(data.frame(SurveyDate = character(),
-                                  ZoneClass = factor(levels = c("I", "II", "III", "III Boulders", "III Rocky Outcrop")),
-                                  DataType = character(),
-                                  DataCount = numeric(),
-                                  stringsAsFactors = FALSE))
+  # 1. Path Setup EDIT THIS TO CORRECT FILE NAME
+  csv_path <- file.path(".", "Data", "shorebird_2025_2026.csv")
   
-  # Reactive value to store the last selected zone
+  # 2. Reactive Values
+  # data() stores session-only info
+  data <- reactiveVal(data.frame(SurveyDate = character(),
+                                 ZoneClass = character(),
+                                 DataType = character(),
+                                 DataCount = numeric(),
+                                 stringsAsFactors = FALSE))
+  
   lastZone <- reactiveVal("Select Zone")
   
+  # Trigger to refresh the 'Last 5' table from the file
+  refresh_file_view <- reactiveVal(0)
+  
+  # 3. Submit Logic
   observeEvent(input$submit, {
-    # Create a new row of data with formatted date
-    new_data <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),
-                            ZoneClass = factor(input$zone, levels = c("I", "II", "III", "III Boulders", "III Rocky Outcrop")),
+    if (input$zone == "Select Zone" || input$dataType == "Select Species") {
+      output$status <- renderText("Error: Please select a valid Zone and Species.")
+      return()
+    }
+    
+    # Create the new row
+    new_entry <- data.frame(SurveyDate = format(input$date, "%m/%d/%Y"),
+                            ZoneClass = as.character(input$zone),
                             DataType = input$dataType,
-                            DataCount = input$dataCount,
+                            DataCount = as.numeric(input$dataCount),
                             stringsAsFactors = FALSE)
     
-    # Append new data to existing data
-    updated_data <- rbind(data(), new_data)
-    data(updated_data)
+    # Update session data
+    updated_session_data <- rbind(data(), new_entry)
+    data(updated_session_data)
     
-    # Update last selected zone
+    # Write to CSV File (Append logic)
+    tryCatch({
+      if (file.exists(csv_path)) {
+        write.table(new_entry, csv_path, sep = ",", col.names = FALSE, 
+                    row.names = FALSE, append = TRUE, qmethod = "double")
+      } else {
+        write.table(new_entry, csv_path, sep = ",", col.names = TRUE, 
+                    row.names = FALSE, append = FALSE, qmethod = "double")
+      }
+      output$status <- renderText(paste("Success! Entry saved to", csv_path))
+      # Trigger the file table to refresh
+      refresh_file_view(refresh_file_view() + 1)
+    }, error = function(e) {
+      output$status <- renderText("ERROR: Close the CSV file if it is open in another program!")
+    })
+    
+    # Reset UI logic
     lastZone(input$zone)
-    
-    # Update status message
-    output$status <- renderText("Data submitted successfully!")
-    
-    # Reset other inputs
     updateSelectInput(session, "dataType", selected = "Select Species")
     updateNumericInput(session, "dataCount", value = 1)
-    
-    # Set the zone input to the last selected zone
     updateSelectInput(session, "zone", selected = lastZone())
   })
   
-  # Remove the last entry
+  # 4. Remove Last Entry (Session only)
   observeEvent(input$removeLast, {
     current_data <- data()
     if (nrow(current_data) > 0) {
-      # Remove the last row
-      updated_data <- current_data[-nrow(current_data), ]
-      data(updated_data)
-      output$status <- renderText("Last entry removed successfully!")
-      
-      # Update lastZone to the new last entry's zone if there are still entries
-      if (nrow(updated_data) > 0) {
-        lastZone(updated_data$ZoneClass[nrow(updated_data)])
-      } else {
-        lastZone("Select Zone")  # Reset if no entries are left
-      }
-    } else {
-      output$status <- renderText("No entries to remove.")
+      data(current_data[-nrow(current_data), ])
+      output$status <- renderText("Last entry removed from session view.")
     }
   })
   
-  # Display the most recent 5 entries in a table
-  output$recentDataTable <- renderTable({
-    current_data <- data()
-    if (nrow(current_data) > 0) {
-      # Get the indices for the most recent 5 entries (or fewer if less than 5 entries exist)
-      start_idx <- max(1, nrow(current_data) - 4)
-      recent_data <- current_data[start_idx:nrow(current_data), ]
-      # Reverse the order to show the most recent at the top
-      recent_data <- recent_data[nrow(recent_data):1, ]
-      return(recent_data)
+  # 5. Table: Last 5 Entries FROM FILE
+  output$fileDataTable <- renderTable({
+    refresh_file_view() # Refresh whenever a new entry is submitted
+    
+    if (file.exists(csv_path)) {
+      file_data <- read.csv(csv_path)
+      # Grab last 5, reverse to show newest on top
+      display_df <- tail(file_data, 5)
+      return(display_df[rev(seq_len(nrow(display_df))), ])
     } else {
-      return(data.frame(Message = "No data entered yet"))
+      return(data.frame(Message = "No data found in file yet."))
     }
-  }, rownames = FALSE)  # Don't include row names for the recent entries
+  }, rownames = FALSE)
   
-  # Display all submitted data in a table
+  # 6. Table: All Session History
   output$dataTable <- renderTable({
     data()
-  }, rownames = TRUE)  # Include row names for the full history
+  }, rownames = TRUE)
   
-  # Download handler for CSV
+  # 7. Download Handler
   output$downloadData <- downloadHandler(
-    filename = function() {
-      paste("shorebird_data_", Sys.Date(), ".csv", sep = "")
-    },
-    content = function(file) {
-      # Specify the path where the CSV will be saved
-      write.csv(data(), file, row.names = FALSE)
-    }
+    filename = function() { paste("session_backup_", Sys.Date(), ".csv", sep = "") },
+    content = function(file) { write.csv(data(), file, row.names = FALSE) }
   )
 }
 
-# Run the application 
+# --- Run App ---
 shinyApp(ui = ui, server = server)
+
 ```
+
 
