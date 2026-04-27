@@ -115,7 +115,7 @@ shorebirds_processed<- shorebirds_clean_old%>%
   arrange(SurveyDate, Zone)
 
 #save PROCESSED/CLEAN DATASET TO DATA FOLDER!!
-write.csv(shorebirds_processed, file = "./Data/Shorebirds_processed_1990_2025.csv")
+write.csv(shorebirds_processed, file = "./Data/Processed/Shorebirds_processed_1990_2025.csv")
 
 #Removing intermediary datasets
 rm(shorebirds_clean_new, shorebirds_clean_old, allshore_new, allshore_old, unique_vales_new, unique_values_old,shorebirds_new, shorebirds_old)
