@@ -24,10 +24,13 @@ Install packages. If you have not recently installed packages, please re-install
 ```{r renviron, eval=FALSE}
 options(download.file.method="wininet")
 ```
+
 ```{r package_install, eval=FALSE}
 #install packages
-install.packages(c("devtools", "tidyverse"))
-devtools::install_github("nationalparkservice/NPSdataverse")
+#install.packages(c("devtools", "tidyverse"))
+install.packages("rlang")
+remotes::install_github("doi-nps/NPSdataverse")
+gitcreds::gitcreds_set()   # paste the token when prompted
 ```
 
 ```{r load_packages}
@@ -42,19 +45,24 @@ library(tidyverse)
 library(ISOcodes)
 ```
 
+```{r}
+birds<- read.csv("./Data_Package/shoreline_birds_with_taxonomy.csv")
+```
+
+
 ## Set the overall package details
 All of the following items should be reviewed and updated to fit the package you are working on. For lists of more than one item, keep the same order (i.e. item #1 should correspond to the same file in each list).
 
 #### Metadata filename
 This becomes the file name of your .xml file. Be sure it ends in _metadata to comply with data package specifications. You do not need to include the extension (.xml).
 ```{r metadata_id}
-metadata_id <- "Shorebird_metadata"
+metadata_id <- "Shoreline_bird_metadata"
 ```
 
 #### Package Title
 Give the data package a title. FAIR principles suggest titles of between 7 and 20 words. Be sure to make your title informative and consider how a naive user would interpret it.
 ```{r package_title}
-package_title <- "Cabrillo National Monument Shorebird Data Package"
+package_title <- "Cabrillo National Monument Shoreline Bird Data Package"
 ```
 
 #### Data collection status
@@ -75,7 +83,7 @@ working_folder <- file.path("C:/Users/tkatayama/OneDrive - DOI/Documents/Project
 Tell R what your data files are called. 
 ```{r list_files}
 # if the data files are in your working directory (and the only .csv files in your working directory are data files:
-data_files <- list.files(path = "./Data_package",
+data_files <- list.files(path = "./Data_Package",
   pattern = "*.csv", ignore.case = TRUE)
 
 ```
@@ -83,12 +91,12 @@ data_files <- list.files(path = "./Data_package",
 #### Name the data files
 These should be relatively short, but perhaps more informative than the actual file names. Make sure that they are in the same order as the files in data_files.
 ```{r data_names}
-data_names <- c("Shorebird data 1990-2025")
+data_names <- c("Shoreline bird data 1990-2025")
 ```
 
 #### Describe each data file. Data file descriptions should be unique and about 10 words long. Descriptions will be used in auto-generated tables within the ReadMe and DRR. If you need to use more than 10 words, consider putting that information into the abstract, methods, or additional information sections. Again, make sure these are in the same order as the files they are describing.
 ```{r data_descriptions}
-data_descriptions <- c("CABR Shorebird Monitoring data from 1990-2025")
+data_descriptions <- c("CABR shoreline bird monitoring data from 1990-2025")
 ```
 
 #### Placeholder URL for data files
@@ -101,7 +109,7 @@ data_urls <- c(rep("temporary URL", length(data_files)))
 Specify where your taxonomic information is. This can be a single file or a list of files and fields (columns) with scientific names that will be used to automatically generate the taxonomic coverage metadata. We suggest using [DarwinCore](https://dwc.tdwg.org/terms) for column names, such as "scientificName". If your data package does not have taxonomic data, skip this step.
 ```{r taxonomic_info}
 # the file(s) where scientific names are located:
-data_taxa_tables <- "shorebirds_with_taxonomy.csv"
+data_taxa_tables <- "shoreline_birds_with_taxonomy.csv"
 
 # the column where your scientific names are within the data files.
 data_taxa_fields <- "scientificName"
@@ -293,11 +301,27 @@ park_units <- c("CABR")
 my_metadata <- EMLeditor::set_content_units(my_metadata, park_units)
 ```
 
+
+#### Set CUI
+```{r}
+my_metadata<- set_permissions(
+  my_metadata,
+  access = c("PUBLIC"),
+  legal_authority_id = NULL,
+  contact_email = NULL,
+  authority_designator = NULL,
+  force = FALSE,
+  NPS = TRUE
+)
+```
+
+
 #### Add the Producing Unit(s)
 This is the unit(s) responsible for generating the data package. It may be a single park (ROMO) or a network (ROMN). It may be identical to the units listed in the previous step, overlapping, or entirely different.
 ```{r prod_units}
 # a single producing unit:
 my_metadata <- EMLeditor::set_producing_units(my_metadata, "CABR")
+
 # alternatively, a list of producing units:
 #my_metadata <- EMLeditor::set_producing_units(my_metadata, c("ROMN", "GRYN"))
 ```
@@ -311,7 +335,7 @@ You can add a project to your metadata. Once the metadata are extracted on DataS
 ```{r add_project}
 # where "1234567" is the DataStore Reference id for the Project
 # that the data package should be linked to.
-my_metadata <- EMLeditor::set_project(my_metadata, 2315158)
+my_metadata <- EMLeditor::set_project(my_metadata, 2321449)
 ```
 
 ## Validate your EML 
@@ -330,7 +354,8 @@ If your EML is not schema valid, the function will notify you of specific proble
 ## Write your EML to an xml file 
 Now it's time to convert your R object to an .xml file and save it. Keep in mind that the file name should end with "_metadata.xml".
 ```{r write_eml}
-EML::write_eml(my_metadata, "Shorebird_metadata.xml")
+
+EML::write_eml(my_metadata, "./Data_Package/Shoreline_bird_metadata.xml")
 ```
 
 ## Check your .xml file  
@@ -340,8 +365,16 @@ Your EML metadata file should be ready for upload. You can run some additional t
 DPchecker::run_congruence_checks(check_metadata_only = TRUE)
 
 # If you .xml file with metadata is in a different directory, you will have to specify that:
-# run_congruence_checks("C:/Users/<yourusername>/Documents/my_data_package", check_metadata_only = TRUE)
+run_congruence_checks("C:/Users/tkatayama/OneDrive - DOI/Documents/Projects/R/Shorebird/Data_Package/", check_metadata_only = TRUE)
 ```
+
+```{r}
+getwd()
+xml <- readLines("./Data_Package/Shoreline_bird_metadata.xml")   # use your actual EML filename
+grep("formatString", xml, value = TRUE)
+```
+
+
 
 ## Check your data package 
 If your data package is now complete, you can run some tests prior to upload to make sure that the package meets a minimal set of requirements and that the data and metadata are properly specified and consistent with each other. This assumes that your data package is in the root of your R project. It will run all of the checks in the code chunk directly above, and then some!
@@ -350,8 +383,10 @@ If your data package is now complete, you can run some tests prior to upload to 
 DPchecker::run_congruence_checks()
 
 # if your data package is somewhere else, specify that:
-# run_congruence_checks("C:/Users/<yourusername>/Documents/my_data_package")
+run_congruence_checks("C:/Users/tkatayama/OneDrive - DOI/Documents/Projects/R/Shorebird/Data_Package")
 ```
+
+
 
 
 ## Upload your data package 

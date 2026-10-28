@@ -87,7 +87,7 @@ ui <- fluidPage(
 # --- Server Logic ---
 server <- function(input, output, session) {
   # CHANGE TO DIRECT TO THE MOST RECENT DATA FILE
-  csv_path <- file.path(".", "Data", "shorebird_2025_2026.csv")
+  csv_path <- file.path("..", "Data", "shorebird_2025_2026.csv")
   refresh_file_view <- reactiveVal(0)
   session_log <- reactiveVal(data.frame())
 

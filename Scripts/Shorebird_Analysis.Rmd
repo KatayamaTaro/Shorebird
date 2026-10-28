@@ -409,11 +409,13 @@ base_theme_45 <- theme(
 light_theme_45 <- theme_bw() + base_theme_45
 
 shoreline_birds_heatmap <- ggplot(shorelinebird_categories, aes(x = Year, y = Category, fill = yeartotal)) +
-  geom_tile(color = "white") +
+  geom_tile(color = "black") +
+    scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
   # text color adjustments
-  geom_text(aes(label = round(yeartotal, 1), 
-                color = yeartotal > 5),
-            size = 1.4) + 
+  #geom_text(aes(label = round(yeartotal, 1), 
+                #color = yeartotal > 5),
+           # size = 1.4) + 
   scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), 
                      guide = "none") +
 scale_fill_gradientn(
@@ -446,6 +448,7 @@ ggsave(filename = file.path(output_dir,"Shoreline_Bird_Observations_Zones.png"),
        units = "in", 
        dpi = 300)
 
+write.csv(shorelinebird_categories, "shorelinebird_categories.csv", row.names = FALSE)
 
 shoreline_birds_heatmap_2 <- ggplot(shorelinebird_categories, aes(x = Year, y = Zone, fill = yeartotal)) +
   geom_tile(color = "white") +
