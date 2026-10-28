@@ -84,8 +84,9 @@ R Shiny is an R package for building interactive web applications directly from 
 
 ## Most Up to Date Data
 
-The most up to date data is in `Shorebirds_processed_1990_2025.csv`.  
-**Note:** This file is in the data folder, which is hidden for now. Please update here with the latest dataset when available.
+The most up to date data is uploaded to datastore, under reference:
+
+https://irma.nps.gov/DataStore/Reference/Profile/2315158
 
 ---
 
