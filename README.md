@@ -120,12 +120,3 @@ See `LICENSE` file for details.
 
 ---
 
-## Contact and Support
-
-For questions or support, please open an issue on GitHub or contact the repository owner.
-
----
-
-## Badges
-
-<!-- You may add badges for build status, license, etc. here in future. -->
